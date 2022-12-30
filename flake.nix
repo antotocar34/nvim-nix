@@ -118,14 +118,21 @@
         inherit name;
         paths = map (mkNeovimAlias configPath) aliases;
       };
-  in {
-    packages."x86_64-linux".neovim = mkNeovim ./config.nix;
-    packages."x86_64-linux".neovimMinimal = mkNeovimAliases {
+    neovimMax = mkNeovim ./config.nix;
+    neovimMinimal = mkNeovimAliases {
       name = "neovim-minimal";
       aliases = ["vi" "nvim-min"];
       configPath = ./profiles/minimal_config.nix;
     };
-
+  in {
+    packages."x86_64-linux".neovim = neovimMax;
+    packages."x86_64-linux".neovimMinimal = neovimMinimal;
     nixosModules.defaults = import ./modules;
+    overlays.default = (_: {
+      nvim-nix = pkgs.symlinkJoin {
+        name = "nvim-nix";
+        paths = [neovimMax neovimMinimal];
+      };
+    });
   };
 }
