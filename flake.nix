@@ -77,7 +77,7 @@
     neovim-flake,
     ...
   } @ inputs: let
-    system = "x86_64-linux";
+    system = "aarch64-darwin";
     pkgs = nixpkgs.legacyPackages.${system};
     l = pkgs.lib // builtins;
 
@@ -125,8 +125,8 @@
       configPath = ./profiles/minimal_config.nix;
     };
   in {
-    packages."x86_64-linux".neovim = neovimMax;
-    packages."x86_64-linux".neovimMinimal = neovimMinimal;
+    packages."aarch64-darwin".neovim = neovimMax;
+    packages."aarch64-darwin".neovimMinimal = neovimMinimal;
     nixosModules.defaults = import ./modules;
     overlays.default = (_: {
       nvim-nix = pkgs.symlinkJoin {
