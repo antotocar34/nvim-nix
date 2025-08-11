@@ -1,6 +1,7 @@
 {
   inputs = {
     neovim-flake.url = "github:antotocar34/neovim-flake?ref=custom_config";
+    flake-utils.url = "github:numtide/flake-utils";
     _leap = {
       url = "github:ggandor/leap.nvim";
       flake = false;
@@ -76,63 +77,72 @@
     nixpkgs,
     neovim-flake,
     ...
-  } @ inputs: let
-    system = "x86_64-linux";
+  } @ inputs: 
+  inputs.flake-utils.lib.eachDefaultSystem (system: let
     pkgs = nixpkgs.legacyPackages.${system};
     l = pkgs.lib // builtins;
 
     customNeovim = configModule:
-      neovim-flake.lib.neovimConfiguration {
-        # A hack to load all plugins automatically
-        # Finds all inputs that start with an underscore (these are plugins)
-        # Remove the underscore and pass into extraInputs
-        extraInputs = let
-          startsWithUnderscore = string: !(l.isNull (l.match "_(.+)" string));
-          plugins = l.filter startsWithUnderscore (l.attrNames inputs);
-        in
+    neovim-flake.lib.neovimConfiguration {
+          # A hack to load all plugins automatically
+          # Finds all inputs that start with an underscore (these are plugins)
+          # Remove the underscore and pass into extraInputs
+          extraInputs = let
+            startsWithUnderscore = string: !(l.isNull (l.match "_(.+)" string));
+            plugins = l.filter startsWithUnderscore (l.attrNames inputs);
+          in
           l.mapAttrs'
           (name: value: l.attrsets.nameValuePair (l.removePrefix "_" name) value)
           (l.genAttrs plugins (s: inputs.${s}));
 
-        modules = let
-          mkCfg = attrs: {config.vim = attrs;};
-        in [
-          (mkCfg configModule)
-          ./modules
-        ];
+          modules = let
+            mkCfg = attrs: {config.vim = attrs;};
+          in [
+            (mkCfg configModule)
+            ./modules
+          ];
 
-        inherit pkgs;
-      };
-    mkNeovim = path: (customNeovim (import path {inherit (neovim-flake) lib;})).neovim;
-    mkNeovimAliases = {
-      name,
-      aliases,
-      configPath,
-    }: let
-      mkNeovimAlias = path: alias: (
-        pkgs.writeShellScriptBin alias
-        "${(l.getExe (mkNeovim path))} $@"
-      );
-    in
-      pkgs.symlinkJoin {
-        inherit name;
-        paths = map (mkNeovimAlias configPath) aliases;
-      };
-    neovimMax = mkNeovim ./config.nix;
-    neovimMinimal = mkNeovimAliases {
-      name = "neovim-minimal";
-      aliases = ["vi" "nvim-min"];
-      configPath = ./profiles/minimal_config.nix;
-    };
+          inherit pkgs;
+        };
+        mkNeovim = path: (customNeovim (import path {inherit (neovim-flake) lib;})).neovim;
+        mkNeovimAliases = {
+          name,
+          aliases,
+          configPath,
+        }: let
+          mkNeovimAlias = path: alias: (
+            pkgs.writeShellScriptBin alias
+            "${(l.getExe (mkNeovim path))} $@"
+            );
+            in
+            pkgs.symlinkJoin {
+            inherit name;
+            paths = map (mkNeovimAlias configPath) aliases;
+            };
+            neovimMax = mkNeovim ./config.nix;
+            neovimMinimal = mkNeovimAliases {
+            name = "neovim-minimal";
+            aliases = ["vi" "nvim-min"];
+            configPath = ./profiles/minimal_config.nix;
+          };
   in {
-    packages."x86_64-linux".neovim = neovimMax;
-    packages."x86_64-linux".neovimMinimal = neovimMinimal;
-    nixosModules.defaults = import ./modules;
-    overlays.default = (_: {
-      nvim-nix = pkgs.symlinkJoin {
-        name = "nvim-nix";
-        paths = [neovimMax neovimMinimal];
-      };
-    });
-  };
-}
+    packages = {
+      neovim = neovimMax;
+      neovimMinimal = neovimMinimal;
+    };
+  });
+  ## // {
+  ##     # These outputs are independent of the system
+  ##     nixosModules.defaults = import ./modules;
+  ##     overlays.default = final: prev: {
+  ##       nvim-nix = final.symlinkJoin {
+  ##         name = "nvim-nix";
+  ##         paths = [
+  ##           (final.neovimMaxFor "aarch64-darwin")
+  ##           (final.neovimMinimalFor "aarch64-darwin")
+  ##         ]; # You might want to adjust this part based on your needs
+  ##       };
+  ##     };
+  ##   };
+  }
+
