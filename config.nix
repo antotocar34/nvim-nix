@@ -43,7 +43,7 @@
     nix.enable = true;
     nix.formatter = "alejandra";
 
-    python = true;
+    python = false;
     clang.enable = false;
     rust.enable = false;
     sql = true;
