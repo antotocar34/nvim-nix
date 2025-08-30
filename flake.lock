@@ -652,11 +652,11 @@
         "which-key": "which-key"
       },
       "locked": {
-        "lastModified": 1671701997,
-        "narHash": "sha256-5tCwqNy4l1Kdq81370yk2nhdn2Hw9lE13GXVDxO2BpY=",
+        "lastModified": 1756566852,
+        "narHash": "sha256-qbh0QwT3fdzvtpetaKcVuA+irZc3u628ArZrUjlzczc=",
         "owner": "antotocar34",
         "repo": "neovim-flake",
-        "rev": "93646314a451e74bf9d453842bf3b7a2a7c2f27e",
+        "rev": "b5598760ba9a99ee1cbc7e9d3c78356340bfb226",
         "type": "github"
       },
       "original": {
