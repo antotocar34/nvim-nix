@@ -1,0 +1,1152 @@
+# CODE PREAMBLE
+# ENVIRONMENTS
+# GENERAL MATHS
+# TEX STUFF
+# GREEK LETTERS
+# LOGIC AND SET THEORY
+# GAME THEORY
+# TEMPLATE
+# BEAMER
+# FRACTION
+# MISCELLANEOUS
+# UNUSED
+
+###
+# CODE PREAMBLE
+###
+global !p
+texMathZones = ['texMathZone' + x for x in ['', 'LI', 'LD', 'TI', 'Env', 'EnvStarred', 'Ensured']]
+
+texIgnoreMathZones = ['texMathTextArg']
+
+texMathZoneIds = vim.eval('map('+str(texMathZones)+", 'hlID(v:val)')")
+texIgnoreMathZoneIds = vim.eval('map('+str(texIgnoreMathZones)+", 'hlID(v:val)')")
+
+ignore = texIgnoreMathZoneIds[0]
+
+def math():
+	synstackids = vim.eval("synstack(line('.'), col('.') - (col('.')>=2 ? 1 : 0))")
+	try:
+		first = next(i for i in reversed(synstackids) if i in texIgnoreMathZoneIds or i in texMathZoneIds)
+		return first != ignore
+	except StopIteration:
+		return False
+endglobal
+
+
+global !p
+def create_matrix(snip):
+
+        matrix_str = (snip.buffer[snip.line].split('mat')[0]+'matrix').strip()
+
+        rows = 'x'.join(snip.buffer[snip.line].split("x", 2)[:-1])
+        cols = 'x'.join(snip.buffer[snip.line].split("x", 2)[-1:])
+
+        int_val = lambda string: int(''.join(s for s in string if s.isdigit()))
+
+        rows = int_val(rows)
+        cols = int_val(cols)
+
+        offset = cols + 1
+        old_spacing = snip.buffer[snip.line][:snip.buffer[snip.line].rfind('\t') + 1]
+
+        snip.buffer[snip.line] = ''
+
+        final_str = old_spacing + "\\begin{"+matrix_str+"}\n"
+
+        for i in range(rows):
+                final_str += old_spacing + '\t'
+                final_str += " & ".join(['$' + str(i * cols + j + offset) for j in range(cols)])
+
+                final_str += " \\\\\\\n"
+
+        final_str += old_spacing + "\\end{"+matrix_str+"}$0"
+
+        snip.expand_anon(final_str)
+endglobal
+
+pre_expand "create_matrix(snip)"
+snippet "(small|[bBpvV])?mat(rix)?(\d+)x(\d+)" "Generate (small|[bBpvV])?matrix of *rows* by *columns*" Ar
+endsnippet
+
+global !p
+def fix_indent(snip):
+    vim.eval('feedkeys("\<c-f>")')
+endglobal
+###
+# ENVIRONMENTS
+###
+snippet beg "begin{} / end{}" bA
+\begin{$1}
+${0:${VISUAL}}
+\end{$1}
+endsnippet
+
+snippet dm "Math" wA
+\[
+${1:${VISUAL}}
+\]$0
+endsnippet
+
+snippet enum "Enumerate" bA
+\begin{enumerate}[$1]
+	\item $0
+\end{enumerate}
+endsnippet
+
+snippet enu "Enumerate" bA
+\paragraph{$1}
+\begin{enumerate}[$2]
+	\item $0
+\end{enumerate}
+endsnippet
+
+# post_expand "fix_indent(snip)"
+snippet it "Individual item" b
+\item $0
+endsnippet
+
+
+snippet quote "quote" bA
+\begin{quote}
+$0
+\end{quote}
+endsnippet
+
+snippet equa "equation" bA
+\begin{equation}
+${1:${VISUAL}}   \label{$0}
+\end{equation}
+endsnippet
+
+snippet desc "description" bA
+\begin{description}
+	\item[$1] $0
+\end{description}
+endsnippet
+
+snippet des "descrip" b
+\item[$1] $0
+endsnippet
+
+snippet mk "Math" wA
+$${1}$`!p
+if t[2] and t[2][0] not in [',', '.', '?', '-', ' ']:
+	snip.rv = ' '
+else:
+	snip.rv = ''
+`$2
+endsnippet
+
+snippet fj "Equation reference" wA
+(\ref{$1})$0
+endsnippet
+
+snippet ci "Equation reference" w
+\citep{$0}$1
+endsnippet
+
+snippet fig "Figure environment" b
+\begin{figure}[htpb]
+	\centering
+	{\includegraphics[width=0.8\textwidth]{/home/carneca/Documents/Latex/images/$2}}
+	\caption{$3}
+	\label{$2}
+\end{figure}$0
+endsnippet
+
+snippet svg "SVG environment" b
+\begin{figure}[htpb]
+	\centering
+	\includesvg[width = 130pt]{/home/carneca/Documents/Latex/figures/$1.svg}
+	\caption{$2}
+	\label{$3}
+\end{figure}
+endsnippet
+
+snippet pgf "PGF file" b
+\begin{figure}[htpb]
+	\centering
+	\scalebox{$4}\input{/home/carneca/Documents/Latex/figures/$3}}
+	\caption{$2}
+	\label{$1}
+\end{figure}$0
+endsnippet
+
+snippet twofig "Two figures" b
+\begin{figure}
+\centering
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=.4\linewidth]{/home/carneca/Documents/Latex/images/$2}
+		\captionof{figure}{A figure}
+		\label{$2}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=.4\linewidth]{/home/carneca/Documents/Latex/images/$1}
+		\captionof{figure}{Another figure}
+		\label{$1}
+	\end{minipage}
+\end{figure}
+$0
+endsnippet
+
+snippet graph "Figure environment" b
+\begin{figure}[ht]
+	\centering
+	\incfig[${1:0.7}]{$2}
+	\caption{$3}
+	\label{$4}
+\end{figure}$0
+endsnippet
+
+snippet tab "table" b
+\begin{table}
+\centering
+\begin{tabular}{@{}$1@{}}
+\toprule
+$2		\\ \midrule
+$0
+
+\end{tabular} 
+\end{table}
+endsnippet
+
+snippet ali "Align" bA
+\begin{align*}
+	${1:${VISUAL}}
+\end{align*}
+endsnippet
+
+snippet proof "Align" bA
+\begin{proof}
+	${1:${VISUAL}}
+\end{proof}
+endsnippet
+
+snippet def "Definition" b
+\begin{definition}(\textbf{$1}):
+$0
+\end{definition}
+endsnippet
+
+snippet def* "Definition" b
+\begin{definition*}(\textbf{$1}):
+$0
+\end{definition*}
+endsnippet
+
+snippet theo "Definition" b
+\begin{theorem}[$1]
+$0
+\end{theorem}
+endsnippet
+
+snippet rem "Remark" b
+\begin{remark}
+$0
+\end{remark}
+endsnippet
+
+
+###
+# GENERAL MATHS
+###
+context "math()"
+snippet nt "numbering" i
+\nt \label{$1}$0
+endsnippet
+
+context "math()"
+snippet op "Math boldface" iA
+\mathbf{$1}$0
+endsnippet
+
+context "math()"
+snippet == "equals" wA
+&=$1 \\\
+endsnippet
+
+context "math()"
+snippet lr "( )" iA
+(${1:${VISUAL}})$0
+endsnippet
+context "math()"
+
+context "math()"
+snippet ang "angle brackets" wA
+\langle ${1:${VISUAL}} \rangle$0
+endsnippet
+
+context "math()"
+snippet (( "left( right)" wA
+\left( ${1:${VISUAL}} \right)$0
+endsnippet
+
+context "math()"
+snippet {{ "left( right)" wA
+\left\{ ${1:${VISUAL}} \right\}$0
+endsnippet
+
+context "math()"
+snippet [[ "left[ right]" wA
+\left[ ${1:${VISUAL}} \right]$0
+endsnippet
+
+context "math()"
+snippet ({ "left\{ right\}" wA
+	\left\\{ ${1:${VISUAL}} \right\\}$0
+endsnippet
+
+context "math()"
+snippet bar "conjugate" wA
+\overline{$1}$0
+endsnippet
+
+context "math()"
+snippet hat "hat" wA
+\hat{$1}$0
+endsnippet
+
+context "math()"
+snippet cal "mathcal" wA
+\mathcal{$1}$0
+endsnippet
+
+context "math()"
+snippet exp "exponential" w
+\exp\left\{$1\right\} $0
+endsnippet
+
+context "math()"
+snippet sum "sum" w
+\sum_{$1}^{$2} $0
+endsnippet
+
+context "math()"
+snippet PR "product" wA
+\prod_{$1}^{$2} $0
+endsnippet
+
+context "math()"
+snippet td "superscript" iA
+^{$1}$0
+endsnippet
+
+context "math()"
+snippet ga "gamma" Ai
+\gamma
+endsnippet
+
+context "math()"
+snippet '(?<!bmat\d)(?<!bma)([A-Za-z])(\d)' "auto subscript" wrA
+`!p snip.rv = match.group(1)`_`!p snip.rv = match.group(2)`
+endsnippet 
+
+context "math()"
+snippet '(?<!bmat\d)(?<!bma)([A-Za-z])_(\d\d)' "auto subscript2" wrA
+`!p snip.rv = match.group(1)`_{`!p snip.rv = match.group(2)`}
+endsnippet
+
+context "math()"
+snippet sq "\sqrt{}" iA
+\sqrt{${1:${VISUAL}}}$0
+endsnippet
+
+context "math()"
+snippet __ "subscript" iA
+_{$1}$0
+endsnippet
+
+context "math()"
+snippet sr "^2" iA
+^2
+endsnippet
+
+context "math()"
+snippet cb "^3" iA
+^3
+endsnippet	
+
+context "math()"
+snippet tt "time index" iA
+_{t}$0
+endsnippet
+
+context "math()"
+snippet tf "time index" iA
+_{t+1}$0
+endsnippet
+
+context "math()"
+snippet ii "index" iA
+_i$0
+endsnippet
+
+context "math()"
+snippet nn "index" iA
+_n$0
+endsnippet
+
+context "math()"
+snippet tb "time index" iA
+_{t-1}$0
+endsnippet
+
+context "math()"
+snippet qtxq  "text" i
+\text{\quad $1 \quad} $0
+endsnippet
+
+context "math()"
+snippet txq  "text" i
+\text{$1\quad} $0
+endsnippet
+
+
+context "math()"
+snippet qtx  "text" i
+\text{\quad$1}  $0
+endsnippet
+
+context "math()"
+snippet tx  "text" i
+\text{$1}$0
+endsnippet
+
+priority 100
+context "math()"
+snippet "([a-zA-Z])bar" "bar" riA
+\overline{`!p snip.rv=match.group(1)`}
+endsnippet
+
+snippet part "d/dx" w
+\frac{\partial ${1:V}}{\partial ${2:x}} $0
+endsnippet
+
+priority 300
+context "math()"
+snippet int "integral" wA
+\int_{$1}^{$2} ${3:${VISUAL}} $0
+endsnippet
+
+context "math()" 
+snippet d "dot"	i
+\dot{$1}$0
+endsnippet
+
+priority 200
+context "math()" 
+snippet dd "dot"	i
+\ddot{$1}$0
+endsnippet
+
+context "math()" 
+snippet ddd "dot"	i
+\dddot{$1}$0
+endsnippet
+context "math()"
+snippet ooo "infinity" wA
+\infty
+endsnippet
+
+context "math()"
+snippet deriv "derivative" wA	
+\frac{d $1}{d $2} 
+endsnippet
+
+context "math()"
+snippet ti "tilde" wA
+\tilde{$1}$0
+endsnippet
+
+context "math()"
+snippet pr "Probability" i
+\Pr ($1) $0
+endsnippet
+
+context "math()"
+snippet it "mathit" iw
+\mathit{$1}$0 
+endsnippet
+
+context "math()"
+snippet lim "limit" wA
+\lim\limits_{${1:n} \to ${2:\infty}} 
+endsnippet
+
+context "math()"
+snippet ind "indicator" wA
+\mathbbm{1}($1)$0 
+endsnippet
+
+context "math()"
+snippet ev "expected value" wA
+\mathbb{E}\left[$1\right]$0
+endsnippet
+
+context "math()"
+snippet var "variance" wA
+\text{Var}\left($1\right)$0
+endsnippet
+
+context "math()" 
+snippet cov "covariance" wA
+\text{Cov}($1)$0
+endsnippet
+
+context "math()"
+snippet over "overbrace" iA
+\overbrace{${1:${VISUAL}}}_\text{$0} 
+endsnippet
+
+context "math()"
+snippet under "underbrace" iA
+\underbrace{${1:${VISUAL}}}_\text{$0} 
+endsnippet
+
+context "math()"
+priority 1000
+snippet bf "mathbf" iA
+\bm{$1}$0
+endsnippet
+
+context "math()"
+snippet RR "real" iA
+\mathbb{R}
+endsnippet
+
+context "math()"
+snippet NN "natural" iA
+\mathbb{N}
+endsnippet
+
+context "math()"
+snippet cr "cartesian product cross" iA
+\times
+endsnippet
+
+context "math()"
+snippet cir "circ" iA
+\circ
+endsnippet
+
+context "math()"
+snippet le "less than or equal to" iA
+\leq
+endsnippet
+
+context "math()"
+snippet ge "greater than or equal to" iA
+\geq
+endsnippet
+
+context "math()"
+snippet st "subject to" iw
+\text{\quad s.t. \quad}
+endsnippet
+
+context "math()"
+snippet qq "subject to" iw
+\quad
+endsnippet
+
+context "math()"
+snippet qqq "subject to" iAw
+\qquad
+endsnippet
+
+context "math()"
+snippet  so "star" iA
+^*
+endsnippet
+
+priority 100
+context "math()"
+snippet ... "ldots" iA
+\ldots
+endsnippet
+
+priority 100
+context "math()"
+snippet ..v "vdots" iA
+\vdots
+endsnippet
+
+priority 100
+context "math()"
+snippet ..d "ddots" iA
+\ddots
+endsnippet
+
+###
+# TEX STUFF
+###
+snippet sec "Section"
+\section{${1:${VISUAL:section name}}}%
+$0
+endsnippet
+
+snippet sec* "Section"
+\section*{${1:${VISUAL:section name}}}%
+${0}
+endsnippet
+
+snippet sub "Subsection"
+\subsection{${1:${VISUAL:subsection name}}}%
+$0
+endsnippet
+
+snippet sub* "Subsection"
+\subsection*{${1:${VISUAL:subsection name}}}
+${0}
+endsnippet
+
+snippet subsub* "Subsubsection"
+\subsubsection*{${1:${VISUAL:subsection name}}}
+${0}
+endsnippet
+
+snippet em "emphasis" iw
+\emph{${1:${VISUAL}}}$0
+endsnippet
+
+snippet noin "noindent" bA
+\noindent $0
+endsnippet
+
+priority 50
+context "math()"
+snippet mem "emphasis" iw
+\text{\emph{${1:${VISUAL}}}}$0
+endsnippet
+
+snippet bf "bold" i
+\textbf{${1:${VISUAL}}}$0
+endsnippet
+
+###
+# LOGIC AND SET THEORY
+###
+context "math()"
+snippet exi "exists" iA
+\exists
+endsnippet
+
+context "math()"
+snippet fo "forall" iA
+\forall
+endsnippet
+
+context "math()"
+snippet and "conjunction" iA
+\wedge
+endsnippet
+
+context "math()"
+snippet or "disjunction" iA
+\vee
+endsnippet
+
+context "math()"
+snippet if "conditional" iA
+\to
+endsnippet
+
+context "math()"
+snippet vd  "syntactic entailment" iA
+\vdash
+endsnippet
+
+
+context "math()"
+snippet vD  "semantic entailment" iA
+\vDash
+endsnippet
+
+context "math()"
+snippet no  "not" iA
+\neg
+endsnippet
+
+context "math()"
+snippet AA "aleph" iA
+\aleph
+endsnippet
+
+context "math()"
+snippet sup "superset" wA
+\supset
+endsnippet
+
+context "math()"
+snippet box "modalbox" iA
+\square$0
+endsnippet
+
+context "math()"
+snippet lz "diamond" iA
+\lozenge$0
+endsnippet
+
+context "math()"
+snippet eq  "equiv" iA
+\equiv$0 
+endsnippet
+
+context "math()"
+snippet ffi  "iff" iA
+\leftrightarrow$0 
+endsnippet
+
+priority 100
+context "math()"
+snippet inn "in" iA
+\in
+endsnippet
+
+context "math()"
+priority 50
+snippet nin "in" iA
+\notin
+endsnippet
+
+context "math()"
+snippet set "set" wA
+\\{$1\\} $0
+endsnippet
+
+priority 10
+context "math()"
+snippet cc "subset" Ai
+\subset 
+endsnippet
+
+context "math()"
+snippet ce "subset" Ai
+\subseteq
+endsnippet
+
+context "math()"
+snippet ne "neq" iA
+\neq
+endsnippet
+
+context "math()"
+snippet nr "norm" iA
+\Vert$1\Vert$0
+endsnippet
+
+context "math()"
+snippet sm "setminus" iA
+\setminus 
+endsnippet
+
+context "math()"
+snippet UU "cup" iA
+\cup 
+endsnippet
+
+context "math()"
+snippet Nn "cap" iA
+\cap 
+endsnippet
+
+context "math()"
+snippet  emp "empty set" iA
+\varnothing
+endsnippet
+
+context "math()"
+snippet pw "piecewise"
+\begin{cases}
+	$1 & \text{if $$3$} \\\
+	$2 & \text{if $$4$} \\\
+\end{cases}
+endsnippet
+
+context "math()"
+snippet AA "aleph" wA
+\aleph
+endsnippet
+
+context "math()"
+snippet pow "powerset" wA
+\mathcal{P}($1)$0
+endsnippet
+
+context "math()"
+snippet abs "modulus" wA
+\abs*{$1}$0
+endsnippet
+
+context "math()"
+snippet cd "multiplication dot" wA
+\cdot
+endsnippet
+
+context "math()"
+snippet imp "Implies" i
+\implies
+endsnippet
+
+context "math()"
+snippet  || "set condition mid" wA
+\;|\;
+endsnippet
+
+###
+# GAME THEORY
+###
+
+context "math()"
+snippet ~> "Preference Relation" iA
+\succsim
+endsnippet
+
+context "math()"
+snippet <~ "Inverse Preference Relation" iA
+\precsim
+endsnippet
+
+context "math()"
+snippet game "2x2 matrix" i
+\begin{table}[H]
+	\centering
+    \setlength{\extrarowheight}{2pt}
+    \begin{tabular}{*{4}{c|}}
+      \multicolumn{2}{c}{} & \multicolumn{2}{c}{Player $Y$} \\\ \cline{3-4}
+      \multicolumn{1}{c}{} &  & $A$  & $B$ \\\ \cline{2-4}
+      \multirow{2}*{Player $X$}  & $A$ & $(x,y)$ & $(x,y)$ \\\ \cline{2-4}
+      & $B$ & $(x,y)$ & $(x,y)$ \\\ \cline{2-4}
+    \end{tabular}
+  \end{table}
+endsnippet
+###
+# GREEK LETTERS
+###
+context "math()"
+snippet ph "phi3" wA
+\phi
+endsnippet	
+
+context "math()"
+snippet PH "big phi" wA
+\Phi
+endsnippet	
+
+context "math()"
+snippet vf "varphi" wA
+\varphi
+endsnippet	
+
+context "math()"
+snippet mu "mu" wA
+\mu
+endsnippet
+
+context "math()"
+snippet th "theta" wA
+\theta
+endsnippet
+
+context "math()"
+snippet ee "eta" wA
+\eta
+endsnippet
+
+context "math()"
+snippet ep "epislon" wA
+\epsilon
+endsnippet
+
+context "math()"
+snippet ps "psi" wA
+\psi
+endsnippet
+
+context "math()"
+snippet DD  "Delta" wA
+\Delta
+endsnippet
+
+context "math()"
+snippet ro "rho" wA
+\rho
+endsnippet
+
+context "math()"
+snippet si "sigma" wA
+\sigma
+endsnippet
+
+context "math()"
+snippet Si "Sigma" wA
+\Sigma
+endsnippet
+
+context "math()"
+snippet bb "beta" wA
+\beta
+endsnippet
+
+context "math()"
+snippet BB "bold beta" wA
+\bm{\beta}
+endsnippet
+
+context "math()"
+snippet aa "alpha" wA
+\alpha
+endsnippet
+
+context "math()"
+snippet ve "varepsilon" wA
+\varepsilon
+endsnippet
+
+context "math()"
+snippet de  "delta" wA
+\delta
+endsnippet
+
+context "math()"
+snippet OO  "Omega" wA
+\Omega
+endsnippet
+
+context "math()"
+snippet TT "Theta" wA
+\Theta
+endsnippet
+
+context "math()"
+snippet la "lambda" wA
+\lambda
+endsnippet
+
+context "math()"
+snippet pp "pi" wA
+\pi
+endsnippet
+
+context "math()"
+snippet ta "tau" wA
+\tau
+endsnippet
+
+context "math()"
+snippet PP "capital pi" wA
+\Pi
+endsnippet
+
+context "math()"
+snippet ze "zeta" wA
+\zeta
+endsnippet
+
+context "math()"
+snippet di "distributed" wA
+\sim
+endsnippet
+
+context "math()"
+snippet log "logarithm" wA
+\log
+endsnippet
+
+context "math()"
+snippet argma "argmax" wA
+\operatorname*{argmax}_{$1} $0
+endsnippet
+
+context "math()"
+snippet argmi "argmin" wA
+\operatorname*{argmin}_{$1} $0
+endsnippet
+
+context "math()"
+snippet gra "gradient" wA
+\nabla
+endsnippet
+###
+# BEAMER
+###
+
+snippet toc "table of contents" b
+\begin{frame}
+\frametitle{Contents}
+\tableofcontents
+\end{frame}
+endsnippet
+
+
+snippet bframe "start frame" b
+\frame{\titlepage} $0
+endsnippet
+
+snippet fr "frame environment" b
+\begin{frame}
+\frametitle{$1}
+$0
+\end{frame}
+endsnippet
+
+snippet fs "frame subtitle" b
+\framesubtitle{$1}
+$0
+endsnippet
+
+###
+# TEMPLATE
+###
+snippet temp "Basic template" bA
+\documentclass{article}
+
+\usepackage[a4paper]{geometry}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{enumerate}
+\usepackage{upgreek}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{svg}
+\usepackage[]{xcolor}
+\usepackage{setspace}
+\usepackage{pdfpages}
+%\usepackage{fullpage}
+\usepackage[justification=centering]{caption}
+\usepackage{natbib}
+\bibliographystyle{apalike}
+\usepackage{titlesec}
+\usepackage{import}
+\usepackage[hyphens]{url}
+
+\newcommand{\incfig}[2][1]{%
+\fontsize{15pt}{16pt}\selectfont 
+	\def\svgwidth{#1\columnwidth}
+	\import{./figures/}{#2.pdf_tex}
+}
+% \pdfsuppresswarningpagegroup=1
+
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem*{definition*}{Definition}
+\theoremstyle{exercise}
+\newtheorem{exercise}{Exercise}[section]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+% Font
+% \usepackage[T1]{fontenc}
+% \usepackage[utf8]{inputenc}
+% \usepackage[urw-garamond]{mathdesign}
+
+\newcommand{\eq}{&=}
+\newcommand\nt{\addtocounter{equation}{1}\tag{\theequation}}
+
+
+
+\title{$1}
+\author{$2}
+\date{$3}
+
+\begin{document}
+\maketitle
+\noindent
+$0
+
+
+
+
+%\newpage
+%\bibliography{/home/carneca/Documents/Latex/bibmaster.bib}
+\end{document}
+endsnippet
+
+###
+# MISC
+###
+snippet bib "bibliography" bA
+\newpage
+\bibliography{/home/carneca/Documents/Latex/bibmaster.bib}
+endsnippet
+
+###
+# NON-MATHS
+###
+
+snippet sign "signature " i 
+Antoine Carnec \;\; 17329720
+endsnippet
+
+snippet fn "footnote" i
+%
+\footnote{$1} %
+$0
+endsnippet
+
+###
+# FRACTION
+###
+context "math()"
+snippet // "Fraction" iA
+\\frac{$1}{$2}$0
+endsnippet
+
+snippet / "Fraction" i
+\\frac{${VISUAL}}{$1}$0
+endsnippet
+
+context "math()"
+snippet '((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/' "symbol frac" wrA
+\\frac{`!p snip.rv = match.group(1)`}{$1}$0
+endsnippet
+
+priority 1000
+context "math()"
+snippet '^.*\)/' "() frac" wrA
+`!p
+stripped = match.string[:-1]
+depth = 0
+i = len(stripped) - 1
+while True:
+	if stripped[i] == ')': depth += 1
+	if stripped[i] == '(': depth -= 1
+	if depth == 0: break;
+	i-=1
+snip.rv = stripped[0:i] + "\\frac{" + stripped[i+1:-1] + "}"
+`{$1}$0
+endsnippet
+
+
+###
+# MISCELLANEOUS
+###
+
+snippet todo "todo" i
+% TODO 
+endsnippet
+
+###
+# UNUSED
+###
+#snippet box "Box"
+#`!p snip.rv = '┌' + '─' * (len(t[1]) + 2) + '┐'`
+#│ $1 │
+#`!p snip.rv = '└' + '─' * (len(t[1]) + 2) + '┘'`
+#	$0
+#endsnippet

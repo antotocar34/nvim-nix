@@ -1,0 +1,70 @@
+# snippet flake "Initialize Flake"
+
+# end
+
+snippet flakeinit "Init flake" b
+{
+  description = "$1";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  };
+
+  outputs = {
+    self,
+    nixpkgs,
+  }@inputs: let
+    system = "x86_64-linux";
+    pkgs = import nixpkgs {
+      inherit system;
+      overlays = [];
+    };
+  in {
+    packages.${system}.default = $0
+    devShells.${system}.default = ...
+  };
+}
+endsnippet
+
+snippet option "mkOption" w
+$1 = lib.mkOption {
+    type = l.types.$2 ;
+    description = "";
+};
+$0
+endsnippet
+
+snippet module "Initialize a module" b
+{config, ...}:
+{
+  options = {
+    $0
+  };
+
+  config = {
+
+  };
+}
+endsnippet
+
+snippet let "Initialize a let binding" w
+let
+  l = pkgs.lib // builtins;
+in
+endsnippet
+
+snippet mkShell "" w
+pkgs.stdenv.mkShellNoCC {
+  buildInputs = [
+	
+  ];
+}$0
+endsnippet
+
+snippet pin "" w
+pkgs = let
+  commit = "`gh api -X GET /repos/nixos/nixpkgs/commits/nixos-unstable | jq -r .sha`";
+in
+  import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/${commit}.tar.gz") {};
+endsnippet
+
