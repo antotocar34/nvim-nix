@@ -81,6 +81,8 @@ return {
         },
         completion = {
           menu = {
+            border = 'rounded',
+            winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder',
             draw = {
               treesitter = { 'lsp' },
               components = {
@@ -97,6 +99,10 @@ return {
           },
           documentation = {
             auto_show = true,
+            window = {
+              border = 'rounded',
+              winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder',
+            },
           },
         },
         snippets = {

@@ -5,11 +5,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixCats.url = "github:BirdeeHub/nixCats-nvim";
 
-
-    # No longer fetched to avoid forcing people to import it, but this remains here as a tutorial.
-    # How to import it into your config is shown farther down in the startupPlugins set.
-    # You put it here like this, and then below you would use it with `pkgs.neovimPlugins.hlargs`
-
     plugins-nord = {
       url = "github:antotocar34/nord.nvim";
       flake = false;
@@ -27,20 +22,9 @@
     luaPath = ./.;
     # this is flake-utils eachSystem
     forEachSystem = utils.eachSystem [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" "aarch64-linux"];
-    # the following extra_pkg_config contains any values
-    # which you want to pass to the config set of nixpkgs
-    # import nixpkgs { config = extra_pkg_config; inherit system; }
-    # will not apply to module imports
-    # as that will have your system values
     extra_pkg_config = {
-      # allowUnfree = true;
+      allowUnfree = true;
     };
-    # management of the system variable is one of the harder parts of using flakes.
-
-    # so I have done it here in an interesting way to keep it out of the way.
-    # It gets resolved within the builder itself, and then passed to your
-    # categoryDefinitions and packageDefinitions.
-
     # this allows you to use ${pkgs.system} whenever you want in those sections
     # without fear.
 
@@ -48,8 +32,6 @@
     dependencyOverlays = /* (import ./overlays inputs) ++ */ [
       # This overlay grabs all the inputs named in the format
       # `plugins-<pluginName>`
-      # Once we add this overlay to our nixpkgs, we are able to
-      # use `pkgs.neovimPlugins`, which is a set of our plugins.
       (utils.standardPluginOverlay inputs)
       # add any other flake overlays here.
 
@@ -95,6 +77,13 @@
         python = with pkgs; [
           ruff
           pyright
+        ];
+        rust = with pkgs; [
+          rust-analyzer
+          rustc
+          rustfmt
+          clippy
+          cargo
         ];
         # and easily check if they are included in lua
         format = with pkgs; [
@@ -320,10 +309,8 @@
           format = true;
           neonixdev = true;
 
-          # enabling this category will enable the go category,
-          # and ALSO debug.go and debug.default due to our extraCats in categoryDefinitions.
-          # go = true; # <- disabled but you could enable it with override or module on install
           python = true;
+          rust = true;
 
           # this does not have an associated category of plugins, 
           # but lua can still check for it

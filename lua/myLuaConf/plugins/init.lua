@@ -141,23 +141,26 @@ require('lze').load {
     event = "DeferredUIEnter",
     -- keys = "",
     after = function(plugin)
-      require('fidget').setup({})
+      require('fidget').setup({
+        notification = {
+          window = {
+            winblend = 40,
+          },
+        },
+      })
+
+      local function dim_fidget_notifications()
+        pcall(vim.api.nvim_set_hl, 0, 'FidgetNotificationTitle', { link = 'Comment' })
+        pcall(vim.api.nvim_set_hl, 0, 'FidgetNotification', { link = 'Comment' })
+      end
+
+      dim_fidget_notifications()
+      vim.api.nvim_create_autocmd('ColorScheme', {
+        group = vim.api.nvim_create_augroup('myLuaConf.fidget.hls', { clear = true }),
+        callback = dim_fidget_notifications,
+      })
     end,
   },
-  -- {
-  --   "hlargs",
-  --   for_cat = 'general.extra',
-  --   event = "DeferredUIEnter",
-  --   -- keys = "",
-  --   dep_of = { "nvim-lspconfig" },
-  --   after = function(plugin)
-  --     require('hlargs').setup {
-  --       color = '#32a88f',
-  --     }
-  --     vim.cmd([[hi clear @lsp.type.parameter]])
-  --     vim.cmd([[hi link @lsp.type.parameter Hlargs]])
-  --   end,
-  -- },
   {
     "lualine.nvim",
     for_cat = 'general.always',
@@ -190,12 +193,12 @@ require('lze').load {
           },
           lualine_x = {'filetype'},
         },
-        tabline = {
-          lualine_a = { 'buffers' },
-          -- if you use lualine-lsp-progress, I have mine here instead of fidget
-          -- lualine_b = { 'lsp_progress', },
-          lualine_z = { 'tabs' }
-        },
+        -- tabline = {
+        --   lualine_a = { 'buffers' },
+        --   -- if you use lualine-lsp-progress, I have mine here instead of fidget
+        --   -- lualine_b = { 'lsp_progress', },
+        --   lualine_z = { 'tabs' }
+        -- },
       })
     end,
   },
@@ -278,9 +281,6 @@ require('lze').load {
           map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git hunk' })
         end,
       })
-      vim.cmd([[hi GitSignsAdd guifg=#04de21]])
-      vim.cmd([[hi GitSignsChange guifg=#83fce6]])
-      vim.cmd([[hi GitSignsDelete guifg=#fa2525]])
     end,
   },
   {

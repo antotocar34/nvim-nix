@@ -6,3 +6,6 @@ t ext:
 
 shell:
   nix shell .#nvim
+
+rust-test:
+  nix run .#nvim "./test_files/rust_demo/src/main.rs"
