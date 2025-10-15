@@ -19,6 +19,8 @@ in {
 
       vim.nnoremap = {
         "¬" = "<cmd>FloatermToggle<CR>";
+        "±" = "<cmd>FloatermToggle<CR>";
+        "§" = "<cmd>FloatermToggle<CR>";
         "<F3>" = "<cmd>FloatermHide<CR><cmd>FloatermPrev<CR>";
         "<F4>" = "<cmd>FloatermHide<CR><cmd>FloatermNext<CR>";
         "<leader>]" = "<cmd>FloatermNew --wintype=vsplit --width=90<CR>";
@@ -30,6 +32,8 @@ in {
         "<F3>" = "<cmd>FloatermHide<CR><cmd>FloatermPrev<CR>";
         "<F4>" = "<cmd>FloatermHide<CR><cmd>FloatermNext<CR>";
         "¬" = "<cmd>FloatermToggle<CR>";
+        "±" = "<cmd>FloatermToggle<CR>";
+        "§" = "<cmd>FloatermToggle<CR>";
         # "<leader>]" = "<cmd>FloatermNew --wintype=vsplit --width=90<CR>";
         # "<leader>[" = "<cmd>FloatermNew --wintype=split --height=15<CR>";
         "<C-w>h" = "<C-\\><C-N><C-w>h";
