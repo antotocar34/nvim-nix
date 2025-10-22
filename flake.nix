@@ -19,7 +19,7 @@
   # see :help nixCats.flake.outputs
   outputs = { self, nixpkgs, ... }@inputs: let
     inherit (inputs.nixCats) utils;
-    luaPath = ./.;
+    luaPath = ./config;
     # this is flake-utils eachSystem
     forEachSystem = utils.eachSystem [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" "aarch64-linux"];
     extra_pkg_config = {
