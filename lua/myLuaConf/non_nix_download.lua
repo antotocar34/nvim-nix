@@ -23,7 +23,6 @@ require('nixCatsUtils.catPacker').setup({
 --[[ ------------------------------------------ ]]
   { "BirdeeHub/lze", },
   { "BirdeeHub/lzextras", },
-  { "stevearc/oil.nvim", },
   { 'joshdick/onedark.vim', },
   { 'nvim-tree/nvim-web-devicons', },
   { 'nvim-lua/plenary.nvim', },
@@ -68,6 +67,8 @@ require('nixCatsUtils.catPacker').setup({
 
   -- { 'm-demare/hlargs.nvim', },
   { 'mbbill/undotree', opt = true, },
+  { 'voldikss/vim-floaterm', opt = true, },
+  { 'nvim-tree/nvim-tree.lua', opt = true, },
   { 'tpope/vim-fugitive', opt = true, },
   { 'tpope/vim-rhubarb', opt = true, },
   { 'tpope/vim-sleuth', opt = true, },

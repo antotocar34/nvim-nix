@@ -2,48 +2,95 @@ local catUtils = require('nixCatsUtils')
 
 local diagnostics_controls = package.loaded['myLuaConf.diagnostics']
 if not diagnostics_controls then
-  local severity_all = { max = vim.diagnostic.severity.HINT }
-  local severity_errors = { max = vim.diagnostic.severity.ERROR }
-
   local state = {
     diagnostics_enabled = true,
     warnings_enabled = true,
   }
 
-  local function severity_config()
-    return state.warnings_enabled and severity_all or severity_errors
-  end
+  local attached_buffers = {}
 
-  local function apply_severity()
-    vim.diagnostic.config({ severity = severity_config() })
-  end
-
-  local function refresh_visible()
-    if not state.diagnostics_enabled then
-      return
+  local function severity_filter()
+    if state.warnings_enabled then
+      return nil
     end
-    vim.diagnostic.hide()
-    vim.diagnostic.show()
+    return { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR }
+  end
+
+  local function for_each_attached_buffer(callback)
+    for bufnr in pairs(attached_buffers) do
+      if vim.api.nvim_buf_is_loaded(bufnr) then
+        callback(bufnr)
+      else
+        attached_buffers[bufnr] = nil
+      end
+    end
+  end
+
+  local virtual_text_formatter
+
+  local function build_config()
+    local config = {
+      severity_sort = true,
+      update_in_insert = false,
+      float = { border = 'rounded' },
+      virtual_lines = false,
+      severity = severity_filter(),
+    }
+
+    if state.diagnostics_enabled then
+      config.signs = true
+      config.underline = true
+      config.virtual_text = {
+        spacing = 0,
+        prefix = '  ',
+        format = virtual_text_formatter,
+      }
+    else
+      config.signs = false
+      config.underline = false
+      config.virtual_text = false
+    end
+
+    return config
+  end
+
+  local function apply_config()
+    local cfg = build_config()
+    vim.diagnostic.config(cfg)
+    for_each_attached_buffer(function(bufnr)
+      if state.diagnostics_enabled then
+        vim.diagnostic.hide(nil, bufnr)
+        vim.diagnostic.show(nil, bufnr)
+      else
+        vim.diagnostic.hide(nil, bufnr)
+      end
+    end)
   end
 
   diagnostics_controls = {}
 
   function diagnostics_controls.current_severity()
-    return severity_config()
+    return severity_filter()
   end
 
-  function diagnostics_controls.with_severity(config)
-    config.severity = severity_config()
-    return config
+  function diagnostics_controls.set_virtual_text_formatter(formatter)
+    virtual_text_formatter = formatter
+    apply_config()
   end
 
   function diagnostics_controls.apply_on_attach(bufnr)
+    attached_buffers[bufnr] = true
+    vim.api.nvim_create_autocmd('BufWipeout', {
+      buffer = bufnr,
+      callback = function()
+        attached_buffers[bufnr] = nil
+      end,
+    })
     if state.diagnostics_enabled then
-      vim.diagnostic.enable(nil, bufnr)
+      vim.diagnostic.hide(nil, bufnr)
       vim.diagnostic.show(nil, bufnr)
     else
       vim.diagnostic.hide(nil, bufnr)
-      vim.diagnostic.disable(nil, bufnr)
     end
   end
 
@@ -57,23 +104,19 @@ if not diagnostics_controls then
 
   function diagnostics_controls.toggle_all()
     state.diagnostics_enabled = not state.diagnostics_enabled
-    if state.diagnostics_enabled then
-      vim.diagnostic.enable()
-      apply_severity()
-      refresh_visible()
-      notify('Diagnostics enabled')
-    else
-      vim.diagnostic.hide()
-      vim.diagnostic.disable()
-      notify('Diagnostics disabled')
-    end
+    apply_config()
+    -- notify(state.diagnostics_enabled and 'Diagnostics enabled' or 'Diagnostics disabled')
   end
 
   function diagnostics_controls.toggle_warnings()
     state.warnings_enabled = not state.warnings_enabled
-    apply_severity()
-    refresh_visible()
-    notify(state.warnings_enabled and 'Warnings enabled' or 'Warnings hidden')
+    apply_config()
+    -- TODO does not work
+    -- notify(state.warnings_enabled and 'Warnings and hints enabled' or 'Warnings and hints hidden')
+  end
+
+  function diagnostics_controls.refresh()
+    apply_config()
   end
 
   package.loaded['myLuaConf.diagnostics'] = diagnostics_controls
@@ -91,19 +134,8 @@ local function diagnostic_text(diagnostic)
   end
   return diagnostic_circle .. ' ' .. message
 end
-vim.diagnostic.config(diagnostics_controls.with_severity({
-  signs = true,
-  severity_sort = true,
-  update_in_insert = false,
-  virtual_text = {
-    spacing = 0,
-    prefix = vim.fn.nr2char(0x09),
-    format = diagnostic_text,
-  },
-  float = {
-    border = 'rounded',
-  },
-}))
+diagnostics_controls.set_virtual_text_formatter(diagnostic_text)
+diagnostics_controls.refresh()
 
 do
   local orig_open_floating_preview = vim.lsp.util.open_floating_preview
@@ -155,6 +187,7 @@ local function prefer_nix_store_cmd(bin)
   end
   return fallback or bin
 end
+
 require('lze').h.lsp.set_ft_fallback(function(name)
   local lspcfg = nixCats.pawsible({ "allPlugins", "opt", "nvim-lspconfig" }) or nixCats.pawsible({ "allPlugins", "start", "nvim-lspconfig" })
   if lspcfg then

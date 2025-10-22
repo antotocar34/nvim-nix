@@ -1,8 +1,8 @@
 return {
-  "leap.nvim",
+  "comment.nvim",
   for_cat = 'general.extra',
   event = "DeferredUIEnter",
   after = function(_)
-    require('leap').add_default_mappings()
+    require('Comment').setup()
   end,
 }

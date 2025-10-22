@@ -9,7 +9,7 @@ def h(x):
 
 
 def g(x):
-    x,y = 3
+    x,y = (3,4)
     return x * x
 
 

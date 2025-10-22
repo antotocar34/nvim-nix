@@ -17,59 +17,18 @@ if ok then
 end
 
 -- NOTE: you can check if you included the category with the thing wherever you want.
-if nixCats('general.extra') then
-  -- I didnt want to bother with lazy loading this.
-  -- I could put it in opt and put it in a spec anyway
-  -- and then not set any handlers and it would load at startup,
-  -- but why... I guess I could make it load
-  -- after the other lze definitions in the next call using priority value?
-  -- didnt seem necessary.
-  vim.g.loaded_netrwPlugin = 1
-  require("oil").setup({
-    default_file_explorer = true,
-    view_options = {
-      show_hidden = true
-    },
-    columns = {
-      "icon",
-      "permissions",
-      "size",
-      -- "mtime",
-    },
-    keymaps = {
-      ["g?"] = "actions.show_help",
-      ["<CR>"] = "actions.select",
-      ["<C-s>"] = "actions.select_vsplit",
-      ["<C-h>"] = "actions.select_split",
-      ["<C-t>"] = "actions.select_tab",
-      ["<C-p>"] = "actions.preview",
-      ["<C-c>"] = "actions.close",
-      ["<C-l>"] = "actions.refresh",
-      ["-"] = "actions.parent",
-      ["_"] = "actions.open_cwd",
-      ["`"] = "actions.cd",
-      ["~"] = "actions.tcd",
-      ["gs"] = "actions.change_sort",
-      ["gx"] = "actions.open_external",
-      ["g."] = "actions.toggle_hidden",
-      ["g\\"] = "actions.toggle_trash",
-    },
-  })
-  vim.keymap.set("n", "-", "<cmd>Oil<CR>", { noremap = true, desc = 'Open Parent Directory' })
-  vim.keymap.set("n", "<leader>-", "<cmd>Oil .<CR>", { noremap = true, desc = 'Open nvim root directory' })
-end
+-- if nixCats('general.extra') then
+-- end
 
 require('lze').load {
   { import = "myLuaConf.plugins.telescope", },
   { import = "myLuaConf.plugins.treesitter", },
   { import = "myLuaConf.plugins.completion", },
+  { import = "myLuaConf.plugins.comment", },
+  { import = "myLuaConf.plugins.leap", },
+  { import = "myLuaConf.plugins.nvimtree", },
   {
     "markdown-preview.nvim",
-    -- NOTE: for_cat is a custom handler that just sets enabled value for us,
-    -- based on result of nixCats('cat.name') and allows us to set a different default if we wish
-    -- it is defined in luaUtils template in lua/nixCatsUtils/lzUtils.lua
-    -- you could replace this with enabled = nixCats('cat.name') == true
-    -- if you didnt care to set a different default for when not using nix than the default you already set
     for_cat = 'general.markdown',
     cmd = { "MarkdownPreview", "MarkdownPreviewStop", "MarkdownPreviewToggle", },
     ft = "markdown",
@@ -93,19 +52,88 @@ require('lze').load {
     end,
   },
   {
-    "comment.nvim",
+    "vim-floaterm",
     for_cat = 'general.extra',
     event = "DeferredUIEnter",
-    after = function(plugin)
-      require('Comment').setup()
-    end,
-  },
-  {
-    "leap.nvim",
-    for_cat = 'general.extra',
-    event = "DeferredUIEnter",
-    after = function(plugin)
-      require('leap').add_default_mappings()
+    after = function(_)
+      local function map(mode, lhs, rhs, desc)
+        vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, desc = desc })
+      end
+
+      map('n', '¬', '<cmd>FloatermToggle<CR>', 'Toggle Floaterm window')
+      map('n', '§', '<cmd>FloatermToggle<CR>', 'Toggle Floaterm window')
+      map('n', '<F3>', '<cmd>FloatermHide<CR><cmd>FloatermPrev<CR>', 'Previous Floaterm instance')
+      map('n', '<F4>', '<cmd>FloatermHide<CR><cmd>FloatermNext<CR>', 'Next Floaterm instance')
+      map('n', '<leader>]', '<cmd>FloatermNew --wintype=vsplit --width=65<CR>', 'New Floaterm vsplit')
+      map('n', '<leader>[', '<cmd>FloatermNew --wintype=split --height=15<CR>', 'New Floaterm split')
+      map('n', '+', '<cmd>FloatermNew --wintype=float --width=180 --height=40<CR>', 'New floating Floaterm')
+
+      map('t', '<F3>', '<cmd>FloatermHide<CR><cmd>FloatermPrev<CR>', 'Previous Floaterm instance')
+      map('t', '<F4>', '<cmd>FloatermHide<CR><cmd>FloatermNext<CR>', 'Next Floaterm instance')
+      map('t', '¬', '<cmd>FloatermToggle<CR>', 'Toggle Floaterm window')
+      map('t', '§', '<cmd>FloatermToggle<CR>', 'Toggle Floaterm window')
+      map('t', '<C-w>h', '<C-\\><C-N><C-w>h', 'Terminal left window')
+      map('t', '<C-w>j', '<C-\\><C-N><C-w>j', 'Terminal down window')
+      map('t', '<C-w>k', '<C-\\><C-N><C-w>k', 'Terminal up window')
+      map('t', '<C-w>l', '<C-\\><C-N><C-w>l', 'Terminal right window')
+      map('t', '<C-q>', '<C-\\><C-N><cmd>FloatermKill<CR>', 'Kill Floaterm instance')
+      map('t', '<C-k>[', '<C-\\><C-N><CR>', 'Leave terminal insert mode')
+
+      vim.g.floaterm_title = ''
+
+      local floaterm_group = vim.api.nvim_create_augroup('myLuaConf.floaterm', { clear = true })
+      local prev_win = -1
+
+      local function apply_floaterm_highlights()
+        if vim.g.colors_name == 'nord' then
+          pcall(vim.api.nvim_set_hl, 0, 'Floaterm', { bg = '#2E3440' })
+          pcall(vim.api.nvim_set_hl, 0, 'NormalFloat', { bg = '#2E3440' })
+          pcall(vim.api.nvim_set_hl, 0, 'FloatermBorder', { fg = '#81A1C1' })
+        end
+      end
+
+      vim.api.nvim_create_autocmd('ColorScheme', {
+        group = floaterm_group,
+        callback = apply_floaterm_highlights,
+      })
+
+      vim.api.nvim_create_autocmd('TermOpen', {
+        group = floaterm_group,
+        callback = function(args)
+          apply_floaterm_highlights()
+          vim.api.nvim_buf_call(args.buf, function()
+            vim.opt_local.number = false
+            vim.opt_local.relativenumber = false
+            vim.opt_local.signcolumn = 'no'
+            vim.cmd('startinsert')
+          end)
+        end,
+      })
+
+      vim.api.nvim_create_autocmd('TermEnter', {
+        group = floaterm_group,
+        callback = function()
+          local channel = vim.bo.channel
+          if channel ~= nil then
+            vim.api.nvim_echo({ { string.format('jobid: %s', channel), 'Comment' } }, false, {})
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd('BufEnter', {
+        group = floaterm_group,
+        callback = function()
+          if vim.bo.buftype == 'terminal' then
+            local current_win = vim.api.nvim_get_current_win()
+            if prev_win ~= current_win then
+              vim.cmd('startinsert')
+            end
+            prev_win = current_win
+          else
+            prev_win = -1
+          end
+        end,
+      })
     end,
   },
   {
@@ -136,6 +164,7 @@ require('lze').load {
     end,
   },
   {
+    -- TODO remove UI or reduce opacity
     "fidget.nvim",
     for_cat = 'general.extra',
     event = "DeferredUIEnter",
@@ -173,25 +202,47 @@ require('lze').load {
 
       require('lualine').setup({
         options = {
-          icons_enabled = false,
+          icons_enabled = true,
           theme = colorschemeName,
-          component_separators = '|',
-          section_separators = '',
+          component_separators = { '⏽', '⏽' },
+          section_separators = { '', '' },
+          disabled_filetypes = { 'NvimTree', 'floaterm' },
         },
         sections = {
-          lualine_c = {
-            {
-              'filename', path = 1, status = true,
-            },
-          },
-        },
-        inactive_sections = {
+          lualine_a = { 'mode' },
           lualine_b = {
             {
-              'filename', path = 3, status = true,
+              'branch',
+              separator = '',
+            },
+            'diff',
+          },
+          lualine_c = {
+            {
+              'filename',
+              path = 2,
             },
           },
-          lualine_x = {'filetype'},
+          lualine_x = {
+            {
+              'diagnostics',
+              sources = { 'nvim_lsp' },
+              separator = '',
+              symbols = { error = '', warn = '', info = '', hint = '' },
+            },
+            { 'filetype' },
+            'hostname',
+          },
+          lualine_y = { 'progress' },
+          lualine_z = { 'location' },
+        },
+        inactive_sections = {
+          lualine_a = {},
+          lualine_b = {},
+          lualine_c = { 'filename' },
+          lualine_x = { 'location' },
+          lualine_y = {},
+          lualine_z = {},
         },
         -- tabline = {
         --   lualine_a = { 'buffers' },
@@ -199,6 +250,7 @@ require('lze').load {
         --   -- lualine_b = { 'lsp_progress', },
         --   lualine_z = { 'tabs' }
         -- },
+        extensions = {},
       })
     end,
   },

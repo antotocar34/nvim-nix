@@ -20,6 +20,7 @@ return {
     for_cat = "general.blink",
     dep_of = { "blink.cmp" },
     after = function (_)
+      vim.g.luasnip_disable_log = true
       local luasnip = require 'luasnip'
       require('luasnip.loaders.from_vscode').lazy_load()
       luasnip.config.setup {}
@@ -44,26 +45,14 @@ return {
     event = "DeferredUIEnter",
     after = function (_)
       require("blink.cmp").setup({
-        -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
+        -- Use the 'super-tab' preset so <Tab> confirms items; keep <C-y> for parity with defaults
         -- See :h blink-cmp-config-keymap for configuring keymaps
         keymap =  {
-          preset = 'default',
+          preset = 'super-tab',
+          ['<C-y>'] = { 'select_and_accept' },
         },
         cmdline = {
-          enabled = true,
-          completion = {
-            menu = {
-              auto_show = true,
-            },
-          },
-          sources = function()
-            local type = vim.fn.getcmdtype()
-            -- Search forward and backward
-            if type == '/' or type == '?' then return { 'buffer' } end
-            -- Commands
-            if type == ':' or type == '@' then return { 'cmdline', 'cmp_cmdline' } end
-            return {}
-          end,
+          enabled = false, -- don't autocomplete on vim commands
         },
         fuzzy = {
           sorts = {
@@ -119,24 +108,13 @@ return {
           end,
         },
         sources = {
-          default = { 'lsp', 'path', 'snippets', 'buffer', 'omni' },
+          default = { 'lsp', 'path' },
           providers = {
             path = {
               score_offset = 50,
             },
             lsp = {
               score_offset = 40,
-            },
-            snippets = {
-              score_offset = 40,
-            },
-            cmp_cmdline = {
-              name = 'cmp_cmdline',
-              module = 'blink.compat.source',
-              score_offset = -100,
-              opts = {
-                cmp_name = 'cmdline',
-              },
             },
           },
         },
