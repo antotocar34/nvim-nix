@@ -1,129 +1,133 @@
 local catUtils = require('nixCatsUtils')
 
-local diagnostics_controls = package.loaded['myLuaConf.diagnostics']
-if not diagnostics_controls then
-  local state = {
-    diagnostics_enabled = true,
-    warnings_enabled = true,
-  }
+require("myLuaConf.LSPs.diagnostics")
+-- require("myLuaConf.LSPs.diagnostics")
 
-  local attached_buffers = {}
-
-  local function severity_filter()
-    if state.warnings_enabled then
-      return nil
-    end
-    return { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR }
-  end
-
-  local function for_each_attached_buffer(callback)
-    for bufnr in pairs(attached_buffers) do
-      if vim.api.nvim_buf_is_loaded(bufnr) then
-        callback(bufnr)
-      else
-        attached_buffers[bufnr] = nil
-      end
-    end
-  end
-
-  local virtual_text_formatter
-
-  local function build_config()
-    local config = {
-      severity_sort = true,
-      update_in_insert = false,
-      float = { border = 'rounded' },
-      virtual_lines = false,
-      severity = severity_filter(),
-    }
-
-    if state.diagnostics_enabled then
-      config.signs = false
-      config.underline = false
-      config.virtual_text = {
-        spacing = 0,
-        prefix = '  ',
-        format = virtual_text_formatter,
-      }
-    else
-      config.signs = false
-      config.underline = false
-      config.virtual_text = false
-    end
-
-    return config
-  end
-
-  local function apply_config()
-    local cfg = build_config()
-    vim.diagnostic.config(cfg)
-    for_each_attached_buffer(function(bufnr)
-      if state.diagnostics_enabled then
-        vim.diagnostic.hide(nil, bufnr)
-        vim.diagnostic.show(nil, bufnr)
-      else
-        vim.diagnostic.hide(nil, bufnr)
-      end
-    end)
-  end
-
-  diagnostics_controls = {}
-
-  function diagnostics_controls.current_severity()
-    return severity_filter()
-  end
-
-  function diagnostics_controls.set_virtual_text_formatter(formatter)
-    virtual_text_formatter = formatter
-    apply_config()
-  end
-
-  function diagnostics_controls.apply_on_attach(bufnr)
-    attached_buffers[bufnr] = true
-    vim.api.nvim_create_autocmd('BufWipeout', {
-      buffer = bufnr,
-      callback = function()
-        attached_buffers[bufnr] = nil
-      end,
-    })
-    if state.diagnostics_enabled then
-      vim.diagnostic.hide(nil, bufnr)
-      vim.diagnostic.show(nil, bufnr)
-    else
-      vim.diagnostic.hide(nil, bufnr)
-    end
-  end
-
-  function diagnostics_controls.should_refresh()
-    return state.diagnostics_enabled
-  end
-
-  local function notify(message)
-    vim.notify(message, vim.log.levels.INFO, { title = 'LSP Diagnostics' })
-  end
-
-  function diagnostics_controls.toggle_all()
-    state.diagnostics_enabled = not state.diagnostics_enabled
-    apply_config()
-    -- notify(state.diagnostics_enabled and 'Diagnostics enabled' or 'Diagnostics disabled')
-  end
-
-  function diagnostics_controls.toggle_warnings()
-    state.warnings_enabled = not state.warnings_enabled
-    apply_config()
-    -- TODO does not work
-    -- notify(state.warnings_enabled and 'Warnings and hints enabled' or 'Warnings and hints hidden')
-  end
-
-  function diagnostics_controls.refresh()
-    apply_config()
-  end
-
-  package.loaded['myLuaConf.diagnostics'] = diagnostics_controls
-end
-if (catUtils.isNixCats and nixCats('lspDebugMode')) then
-  vim.lsp.set_log_level("debug")
-end
+-- local diagnostics_controls = package.loaded['myLuaConf.diagnostics']
+--
+-- if not diagnostics_controls then
+--   local state = {
+--     diagnostics_enabled = true,
+--     warnings_enabled = true,
+--   }
+--
+--   local attached_buffers = {}
+--
+--   local function severity_filter()
+--     if state.warnings_enabled then
+--       return nil
+--     end
+--     return { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR }
+--   end
+--
+--   local function for_each_attached_buffer(callback)
+--     for bufnr in pairs(attached_buffers) do
+--       if vim.api.nvim_buf_is_loaded(bufnr) then
+--         callback(bufnr)
+--       else
+--         attached_buffers[bufnr] = nil
+--       end
+--     end
+--   end
+--
+--   local virtual_text_formatter
+--
+--   local function build_config()
+--     local config = {
+--       severity_sort = true,
+--       update_in_insert = false,
+--       float = { border = 'rounded' },
+--       virtual_lines = false,
+--       severity = severity_filter(),
+--     }
+--
+--     if state.diagnostics_enabled then
+--       config.signs = false
+--       config.underline = false
+--       config.virtual_text = {
+--         spacing = 0,
+--         prefix = '  ',
+--         format = virtual_text_formatter,
+--       }
+--     else
+--       config.signs = false
+--       config.underline = false
+--       config.virtual_text = false
+--     end
+--
+--     return config
+--   end
+--
+--   local function apply_config()
+--     local cfg = build_config()
+--     vim.diagnostic.config(cfg)
+--     for_each_attached_buffer(function(bufnr)
+--       if state.diagnostics_enabled then
+--         vim.diagnostic.hide(nil, bufnr)
+--         vim.diagnostic.show(nil, bufnr)
+--       else
+--         vim.diagnostic.hide(nil, bufnr)
+--       end
+--     end)
+--   end
+--
+--   diagnostics_controls = {}
+--
+--   function diagnostics_controls.current_severity()
+--     return severity_filter()
+--   end
+--
+--   function diagnostics_controls.set_virtual_text_formatter(formatter)
+--     virtual_text_formatter = formatter
+--     apply_config()
+--   end
+--
+--   function diagnostics_controls.apply_on_attach(bufnr)
+--     attached_buffers[bufnr] = true
+--     vim.api.nvim_create_autocmd('BufWipeout', {
+--       buffer = bufnr,
+--       callback = function()
+--         attached_buffers[bufnr] = nil
+--       end,
+--     })
+--     if state.diagnostics_enabled then
+--       vim.diagnostic.hide(nil, bufnr)
+--       vim.diagnostic.show(nil, bufnr)
+--     else
+--       vim.diagnostic.hide(nil, bufnr)
+--     end
+--   end
+--
+--   function diagnostics_controls.should_refresh()
+--     return state.diagnostics_enabled
+--   end
+--
+--   local function notify(message)
+--     vim.notify(message, vim.log.levels.INFO, { title = 'LSP Diagnostics' })
+--   end
+--
+--   function diagnostics_controls.toggle_all()
+--     state.diagnostics_enabled = not state.diagnostics_enabled
+--     apply_config()
+--     -- notify(state.diagnostics_enabled and 'Diagnostics enabled' or 'Diagnostics disabled')
+--   end
+--
+--   function diagnostics_controls.toggle_warnings()
+--     state.warnings_enabled = not state.warnings_enabled
+--     apply_config()
+--     -- TODO does not work
+--     -- notify(state.warnings_enabled and 'Warnings and hints enabled' or 'Warnings and hints hidden')
+--   end
+--
+--   function diagnostics_controls.refresh()
+--     apply_config()
+--   end
+--
+--   package.loaded['myLuaConf.diagnostics'] = diagnostics_controls
+-- end
+-- diagnostics_control = require("myLuaConf.LSPs.diagnostics")
+-- diagnostics_controls.set_virtual_text_formatter(diagnostic_text)
+-- diagnostics_controls.refresh()
 
 local diagnostic_circle = vim.fn.nr2char(0x25CF)
 local function diagnostic_text(diagnostic)
@@ -134,8 +138,6 @@ local function diagnostic_text(diagnostic)
   end
   return diagnostic_circle .. ' ' .. message
 end
-diagnostics_controls.set_virtual_text_formatter(diagnostic_text)
-diagnostics_controls.refresh()
 
 do
   local orig_open_floating_preview = vim.lsp.util.open_floating_preview
@@ -146,15 +148,11 @@ do
   end
 end
 
-local function dim_inlay_hints()
-  pcall(vim.api.nvim_set_hl, 0, 'LspInlayHint', { link = 'Comment' })
-end
-dim_inlay_hints()
-vim.api.nvim_create_autocmd('ColorScheme', {
-  desc = 'Keep inlay hints subtle after colorscheme changes',
-  callback = dim_inlay_hints,
-})
 
+
+if (catUtils.isNixCats and nixCats('lspDebugMode')) then
+  vim.lsp.set_log_level("debug")
+end
 -- NOTE: This file uses lzextras.lsp handler https://github.com/BirdeeHub/lzextras?tab=readme-ov-file#lsp-handler
 -- This is a slightly more performant fallback function
 -- for when you don't provide a filetype to trigger on yourself.
@@ -188,6 +186,92 @@ local function prefer_nix_store_cmd(bin)
   return fallback or bin
 end
 
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('myLuaConf.lsp.attach', { clear = true }),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    require('myLuaConf.LSPs.on_attach')(client, args.buf)
+  end,
+})
+
+
+-- local function convert_diagnostics(items)
+--   if not items then
+--     return {}
+--   end
+--   local converted = {}
+--   for _, diagnostic in ipairs(items) do
+--     local range = diagnostic.range or diagnostic.targetRange
+--     if range and range.start and type(range.start.line) == 'number' then
+--       local range_end = range['end']
+--       table.insert(converted, {
+--         lnum = range.start.line,
+--         col = range.start.character or 0,
+--         end_lnum = range_end and range_end.line or range.start.line,
+--         end_col = range_end and range_end.character or range.start.character or 0,
+--         severity = diagnostic.severity,
+--         message = diagnostic.message or '',
+--         source = diagnostic.source,
+--         code = diagnostic.code,
+--         user_data = diagnostic,
+--       })
+--     end
+--   end
+--   return converted
+-- end
+-- local refresh_group = vim.api.nvim_create_augroup('myLuaConf.lsp.refresh_diagnostics', { clear = true })
+-- vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufWritePost' }, {
+--   group = refresh_group,
+--   callback = function(args)
+--     local bufnr = args.buf
+--     if not vim.api.nvim_buf_is_valid(bufnr) then
+--       return
+--     end
+--     if not diagnostics_controls.should_refresh() then
+--       return
+--     end
+--     vim.schedule(function()
+--       if not vim.api.nvim_buf_is_valid(bufnr) then
+--         return
+--       end
+--       -- Request a diagnostics refresh from clients that support the LSP 3.18 diagnostic pull API.
+--       for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+--         if client.supports_method('textDocument/diagnostic') then
+--           local params = vim.lsp.util.make_text_document_params(bufnr)
+--           client:request('textDocument/diagnostic', { textDocument = params }, function(err, result)
+--             if err or not result then
+--               return
+--             end
+--             local namespace = vim.lsp.diagnostic.get_namespace(client.id)
+--             if result.kind ~= 'unchanged' then
+--               vim.diagnostic.set(namespace, bufnr, convert_diagnostics(result.items), {})
+--             end
+--             if result.relatedDocuments then
+--               for uri, doc in pairs(result.relatedDocuments) do
+--                 if doc.kind ~= 'unchanged' then
+--                   local related_bufnr = vim.uri_to_bufnr(uri)
+--                   if related_bufnr and vim.api.nvim_buf_is_valid(related_bufnr) then
+--                     vim.diagnostic.set(namespace, related_bufnr, convert_diagnostics(doc.items), {})
+--                   end
+--                 end
+--               end
+--             end
+--           end)
+--         end
+--       end
+--       vim.diagnostic.show(nil, bufnr)
+--     end)
+--   end,
+-- })
+
+
+-- pcall(vim.api.nvim_set_hl, 0, 'LspInlayHint', { link = 'Comment' })
+-- vim.api.nvim_create_autocmd('ColorScheme', {
+--   desc = 'Keep inlay hints subtle after colorscheme changes',
+--   callback = dim_inlay_hints,
+-- })
+
 require('lze').h.lsp.set_ft_fallback(function(name)
   local lspcfg = nixCats.pawsible({ "allPlugins", "opt", "nvim-lspconfig" }) or nixCats.pawsible({ "allPlugins", "start", "nvim-lspconfig" })
   if lspcfg then
@@ -200,87 +284,6 @@ require('lze').h.lsp.set_ft_fallback(function(name)
     return old_ft_fallback(name)
   end
 end)
-
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('myLuaConf.lsp.attach', { clear = true }),
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    require('myLuaConf.LSPs.on_attach')(client, args.buf)
-  end,
-})
-
-
-local function convert_diagnostics(items)
-  if not items then
-    return {}
-  end
-  local converted = {}
-  for _, diagnostic in ipairs(items) do
-    local range = diagnostic.range or diagnostic.targetRange
-    if range and range.start and type(range.start.line) == 'number' then
-      local range_end = range['end']
-      table.insert(converted, {
-        lnum = range.start.line,
-        col = range.start.character or 0,
-        end_lnum = range_end and range_end.line or range.start.line,
-        end_col = range_end and range_end.character or range.start.character or 0,
-        severity = diagnostic.severity,
-        message = diagnostic.message or '',
-        source = diagnostic.source,
-        code = diagnostic.code,
-        user_data = diagnostic,
-      })
-    end
-  end
-  return converted
-end
-
-
-local refresh_group = vim.api.nvim_create_augroup('myLuaConf.lsp.refresh_diagnostics', { clear = true })
-vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufWritePost' }, {
-  group = refresh_group,
-  callback = function(args)
-    local bufnr = args.buf
-    if not vim.api.nvim_buf_is_valid(bufnr) then
-      return
-    end
-    if not diagnostics_controls.should_refresh() then
-      return
-    end
-    vim.schedule(function()
-      if not vim.api.nvim_buf_is_valid(bufnr) then
-        return
-      end
-      -- Request a diagnostics refresh from clients that support the LSP 3.18 diagnostic pull API.
-      for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-        if client.supports_method('textDocument/diagnostic') then
-          local params = vim.lsp.util.make_text_document_params(bufnr)
-          client:request('textDocument/diagnostic', { textDocument = params }, function(err, result)
-            if err or not result then
-              return
-            end
-            local namespace = vim.lsp.diagnostic.get_namespace(client.id)
-            if result.kind ~= 'unchanged' then
-              vim.diagnostic.set(namespace, bufnr, convert_diagnostics(result.items), {})
-            end
-            if result.relatedDocuments then
-              for uri, doc in pairs(result.relatedDocuments) do
-                if doc.kind ~= 'unchanged' then
-                  local related_bufnr = vim.uri_to_bufnr(uri)
-                  if related_bufnr and vim.api.nvim_buf_is_valid(related_bufnr) then
-                    vim.diagnostic.set(namespace, related_bufnr, convert_diagnostics(doc.items), {})
-                  end
-                end
-              end
-            end
-          end)
-        end
-      end
-      vim.diagnostic.show(nil, bufnr)
-    end)
-  end,
-})
-
 
 require('lze').load {
   {

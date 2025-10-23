@@ -66,7 +66,7 @@ return {
     -- ft = "",
     keys = {
       { "<leader>sM", '<cmd>Telescope notify<CR>', mode = {"n"}, desc = '[S]earch [M]essage', },
-      { "<leader>sp",live_grep_git_root, mode = {"n"}, desc = '[S]earch git [P]roject root', },
+      { "<leader>sp", live_grep_git_root, mode = {"n"}, desc = '[S]earch git [P]roject root', },
       { "<leader>/", function()
         -- Slightly advanced example of overriding default behavior and theme
         -- You can pass additional configuration to telescope to change theme, layout, etc.
@@ -86,10 +86,12 @@ return {
       { "<leader>sr", function() return require('telescope.builtin').resume() end, mode = {"n"}, desc = '[S]earch [R]esume', },
       { "<leader>sd", function() return require('telescope.builtin').diagnostics() end, mode = {"n"}, desc = '[S]earch [D]iagnostics', },
       { "<leader>sg", function() return require('telescope.builtin').live_grep() end, mode = {"n"}, desc = '[S]earch by [G]rep', },
-      { "<leader>j;", function() return require('telescope.builtin').live_grep() end, mode = {"n"}, desc = '[S]earch [G]elp', },
+      { "<leader>j;", function() return require('telescope.builtin').live_grep() end, mode = {"n"}, desc = 'Search Grep', },
+      { "<leader>jg", live_grep_git_root, mode = {"n"}, desc = 'Grep [G]it root', },
       { "<leader>sw", function() return require('telescope.builtin').grep_string() end, mode = {"n"}, desc = '[S]earch current [W]ord', },
       { "<leader>ss", function() return require('telescope.builtin').builtin() end, mode = {"n"}, desc = '[S]earch [S]elect Telescope', },
       { "<leader>sf", function() return require('telescope.builtin').find_files() end, mode = {"n"}, desc = '[S]earch [F]iles', },
+      { "<leader>jf", function() return require('telescope.builtin').git_files() end, mode = {"n"}, desc = 'Search Git [F]iles', },
       { "<leader>sk", function() return require('telescope.builtin').keymaps() end, mode = {"n"}, desc = '[S]earch [K]eymaps', },
       { "<leader>sh", function() return require('telescope.builtin').help_tags() end, mode = {"n"}, desc = '[S]earch [H]elp', },
     },

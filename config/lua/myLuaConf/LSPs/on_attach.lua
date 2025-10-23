@@ -1,4 +1,4 @@
-local diagnostics = require('myLuaConf.diagnostics')
+local diagnostics = require('myLuaConf.LSPs.diagnostics')
 
 return function(_, bufnr)
   -- we create a function that lets us more easily define mappings specific
@@ -19,12 +19,11 @@ return function(_, bufnr)
 
   nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
 
-  vim.keymap.set('n', '<C-,>', diagnostics.toggle_all, { buffer = bufnr, desc = 'LSP: Toggle diagnostics' })
-  vim.keymap.set('i', '<C-,>', function()
-    diagnostics.toggle_all()
-    return ''
-  end, { buffer = bufnr, expr = true, desc = 'LSP: Toggle diagnostics' })
+  nmap('<C-,>', require("myLuaConf.LSPs.diagnostics").toggle_all, 'LSP: Toggle diagnostics' )
+  vim.keymap.set('i', '<C-,>', function() require("myLuaConf.LSPs.diagnostics").toggle_all() return '' end
+  , { buffer = bufnr, expr = true, desc = 'LSP: Toggle diagnostics' })
 
+  nmap('<leader>ta', diagnostics.toggle_all, '[T]oggle [A]ll')
   nmap('<leader>tw', diagnostics.toggle_warnings, '[T]oggle [W]arnings')
 
   -- NOTE: why are these functions that call the telescope builtin?

@@ -128,7 +128,7 @@ vim.keymap.set({ "n", "v", "x" }, '<C-s>', ':update <CR>', { noremap = true, sil
 vim.keymap.set({ "i" }, '<C-s>', '<Esc>:update <CR>', { noremap = true, silent = true, desc = 'Save' })
 
 vim.keymap.set({ "v", "x", "n" }, '<leader>y', '"+y', { noremap = true, silent = true, desc = 'Yank to clipboard' })
-vim.keymap.set({ "n", "v", "x" }, '<leader>Y', '"+yy', { noremap = true, silent = true, desc = 'Yank line to clipboard' })
+vim.keymap.set({ "n", "v", "x" }, 'Y', '"+y', { noremap = true, silent = true, desc = 'Yank line to clipboard' })
 vim.keymap.set({ "n", "v", "x" }, '<C-a>', 'gg0vG$', { noremap = true, silent = true, desc = 'Select all' })
 vim.keymap.set({ 'n', 'v', 'x' }, '<leader>p', '"+p', { noremap = true, silent = true, desc = 'Paste from clipboard' })
 vim.keymap.set('i', '<C-p>', '<C-r><C-p>+',
@@ -136,13 +136,6 @@ vim.keymap.set('i', '<C-p>', '<C-r><C-p>+',
 vim.keymap.set("x", "<leader>P", '"_dP',
   { noremap = true, silent = true, desc = 'Paste over selection without erasing unnamed register' })
 
-
-local function write_file(content, path)
-  local file, err = io.open(path, "w")
-
-  file:write(content)
-  file:close()
-end
 
 local function reload_config()
   local NS  = "myLuaConf"                                 -- <- your top-level namespace
@@ -155,13 +148,17 @@ local function reload_config()
     vim.notify("ALT missing: " .. INIT, vim.log.levels.ERROR); return
   end
 
-  write_file(vim.inspect(package.loaded), "/Users/antoine.carnec/.test/nvim_debug/packagesdotloaded")
-
   -- keep ALT on rtp (so colors/ftplugin/etc. can be found if needed)
   pcall(function() vim.opt.rtp:remove(ALT) end)
   vim.opt.rtp:prepend(ALT)
 
   -- clear lazy/lze caches so plugin specs can be re-registered on reload
+  pcall(function()
+    local mod = package.loaded['lze']
+    if type(mod) == 'table' and type(mod.clear_handlers) == 'function' then
+      mod.clear_handlers()
+    end
+  end)
   for name, _ in pairs(package.loaded) do
     if name:match('^lazy') or name:match('^lze') or name:match('^lzextras') then
       package.loaded[name] = nil
@@ -192,16 +189,15 @@ local function reload_config()
     end
   end
 
-  -- run ALT init.lua with wrapped require, then restore
   local ok, err
   _G.require = alt_require
   ok, err = pcall(dofile, INIT)
   _G.require = orig_require
 
   if not ok then
-    vim.notify("ALT init error:\n" .. err, vim.log.levels.ERROR)
+    vim.notify("Can't find reload config path:\n" .. err, vim.log.levels.ERROR)
   else
-    vim.notify("Loaded ALT: " .. ALT)
+    vim.notify("Reload Config")
   end
 end
 

@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/e643668fd71b949c53f8626614b21ff71a07379d";
-    nixCats.url = "github:BirdeeHub/nixCats-nvim";
+    nixCats.url = "github:BirdeeHub/nixCats-nvim"; 
 
     plugins-nord = {
       url = "github:antotocar34/nord.nvim";
