@@ -12,7 +12,7 @@ if ok then
   })
   vim.notify = notify
   vim.keymap.set("n", "<Esc>", function()
-      notify.dismiss({ silent = true, })
+    notify.dismiss({ silent = true, })
   end, { desc = "dismiss notify popup and clear hlsearch" })
 end
 
@@ -33,9 +33,9 @@ require('lze').load {
     cmd = { "MarkdownPreview", "MarkdownPreviewStop", "MarkdownPreviewToggle", },
     ft = "markdown",
     keys = {
-      {"<leader>mp", "<cmd>MarkdownPreview <CR>", mode = {"n"}, noremap = true, desc = "markdown preview"},
-      {"<leader>ms", "<cmd>MarkdownPreviewStop <CR>", mode = {"n"}, noremap = true, desc = "markdown preview stop"},
-      {"<leader>mt", "<cmd>MarkdownPreviewToggle <CR>", mode = {"n"}, noremap = true, desc = "markdown preview toggle"},
+      { "<leader>mp", "<cmd>MarkdownPreview <CR>",       mode = { "n" }, noremap = true, desc = "markdown preview" },
+      { "<leader>ms", "<cmd>MarkdownPreviewStop <CR>",   mode = { "n" }, noremap = true, desc = "markdown preview stop" },
+      { "<leader>mt", "<cmd>MarkdownPreviewToggle <CR>", mode = { "n" }, noremap = true, desc = "markdown preview toggle" },
     },
     before = function(plugin)
       vim.g.mkdp_auto_close = 0
@@ -66,7 +66,7 @@ require('lze').load {
       map('n', '<F4>', '<cmd>FloatermHide<CR><cmd>FloatermNext<CR>', 'Next Floaterm instance')
       map('n', '<leader>]', '<cmd>FloatermNew --wintype=vsplit --width=65<CR>', 'New Floaterm vsplit')
       map('n', '<leader>[', '<cmd>FloatermNew --wintype=split --height=15<CR>', 'New Floaterm split')
-      map('n', '+', '<cmd>FloatermNew --wintype=float --width=180 --height=40<CR>', 'New floating Floaterm')
+      map('n', '+', '<cmd>FloatermNew --wintype=float --width=120 --height=40<CR>', 'New floating Floaterm')
 
       map('t', '<F3>', '<cmd>FloatermHide<CR><cmd>FloatermPrev<CR>', 'Previous Floaterm instance')
       map('t', '<F4>', '<cmd>FloatermHide<CR><cmd>FloatermNext<CR>', 'Next Floaterm instance')
@@ -198,8 +198,7 @@ require('lze').load {
     -- ft = "",
     -- keys = "",
     -- colorscheme = "",
-    after = function (plugin)
-
+    after = function(plugin)
       require('lualine').setup({
         options = {
           icons_enabled = true,
@@ -262,16 +261,19 @@ require('lze').load {
     -- ft = "",
     -- keys = "",
     -- colorscheme = "",
-    after = function (plugin)
+    after = function(plugin)
       require('gitsigns').setup({
         -- See `:help gitsigns.txt`
         signs = {
-          add = { text = '|' },
-          change = { text = '~' },
-          delete = { text = '_' },
-          topdelete = { text = '‾' },
-          changedelete = { text = '~' },
+          -- add          = { text = '|' },
+          add          = { text = '▎' },
+          change       = { text = '▎' },
+          delete       = { text = '_' },
+          topdelete    = { text = '‾' },
+          changedelete = { text = '▎' },
         },
+        sign_priority = 20,
+
         on_attach = function(bufnr)
           local gs = package.loaded.gitsigns
 
@@ -311,15 +313,15 @@ require('lze').load {
             gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
           end, { desc = 'reset git hunk' })
           -- normal mode
-          map('n', '<leader>gs', gs.stage_hunk, { desc = 'git stage hunk' })
-          map('n', '<leader>gr', gs.reset_hunk, { desc = 'git reset hunk' })
-          map('n', '<leader>gS', gs.stage_buffer, { desc = 'git Stage buffer' })
-          map('n', '<leader>gu', gs.undo_stage_hunk, { desc = 'undo stage hunk' })
-          map('n', '<leader>gR', gs.reset_buffer, { desc = 'git Reset buffer' })
-          map('n', '<leader>gp', gs.preview_hunk, { desc = 'preview git hunk' })
+          map('n', '<leader>gs', gs.stage_hunk, { desc = 'git [s]tage hunk' })
+          map('n', '<leader>gr', gs.reset_hunk, { desc = 'git [r]eset hunk' })
+          map('n', '<leader>gS', gs.stage_buffer, { desc = 'git [S]tage buffer' })
+          map('n', '<leader>gu', gs.undo_stage_hunk, { desc = '[u]ndo stage hunk' })
+          map('n', '<leader>gR', gs.reset_buffer, { desc = 'git [R]eset buffer' })
+          map('n', '<leader>gp', gs.preview_hunk, { desc = '[p]review git hunk' })
           map('n', '<leader>gb', function()
             gs.blame_line { full = false }
-          end, { desc = 'git blame line' })
+          end, { desc = 'git [b]lame line' })
           map('n', '<leader>gd', gs.diffthis, { desc = 'git diff against index' })
           map('n', '<leader>gD', function()
             gs.diffthis '~'
@@ -343,28 +345,28 @@ require('lze').load {
     -- ft = "",
     -- keys = "",
     -- colorscheme = "",
-    after = function (plugin)
+    after = function(plugin)
       require('which-key').setup({
       })
       require('which-key').add {
-        { "<leader><leader>", group = "buffer commands" },
+        { "<leader><leader>",  group = "buffer commands" },
         { "<leader><leader>_", hidden = true },
-        { "<leader>c", group = "[c]ode" },
-        { "<leader>c_", hidden = true },
-        { "<leader>d", group = "[d]ocument" },
-        { "<leader>d_", hidden = true },
-        { "<leader>g", group = "[g]it" },
-        { "<leader>g_", hidden = true },
-        { "<leader>m", group = "[m]arkdown" },
-        { "<leader>m_", hidden = true },
-        { "<leader>r", group = "[r]ename" },
-        { "<leader>r_", hidden = true },
-        { "<leader>s", group = "[s]earch" },
-        { "<leader>s_", hidden = true },
-        { "<leader>t", group = "[t]oggles" },
-        { "<leader>t_", hidden = true },
-        { "<leader>w", group = "[w]orkspace" },
-        { "<leader>w_", hidden = true },
+        { "<leader>c",         group = "[c]ode" },
+        { "<leader>c_",        hidden = true },
+        { "<leader>d",         group = "[d]ocument" },
+        { "<leader>d_",        hidden = true },
+        { "<leader>g",         group = "[g]it" },
+        { "<leader>g_",        hidden = true },
+        { "<leader>m",         group = "[m]arkdown" },
+        { "<leader>m_",        hidden = true },
+        { "<leader>r",         group = "[r]ename" },
+        { "<leader>r_",        hidden = true },
+        { "<leader>s",         group = "[s]earch" },
+        { "<leader>s_",        hidden = true },
+        { "<leader>t",         group = "[t]oggles" },
+        { "<leader>t_",        hidden = true },
+        { "<leader>w",         group = "[w]orkspace" },
+        { "<leader>w_",        hidden = true },
       }
     end,
   },

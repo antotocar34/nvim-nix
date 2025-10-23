@@ -88,8 +88,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
-vim.g.netrw_liststyle=0
-vim.g.netrw_banner=0
+vim.g.netrw_liststyle = 0
+vim.g.netrw_banner = 0
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -120,13 +120,89 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+vim.keymap.set('n', '<leader>q', ":bd <CR>", { desc = 'Close Buffer' })
 
 
 -- You should instead use these keybindings so that they are still easy to use, but dont conflict
-vim.keymap.set({"v", "x", "n"}, '<leader>y', '"+y', { noremap = true, silent = true, desc = 'Yank to clipboard' })
-vim.keymap.set({"n", "v", "x"}, '<leader>Y', '"+yy', { noremap = true, silent = true, desc = 'Yank line to clipboard' })
-vim.keymap.set({"n", "v", "x"}, '<C-a>', 'gg0vG$', { noremap = true, silent = true, desc = 'Select all' })
-vim.keymap.set({'n', 'v', 'x'}, '<leader>p', '"+p', { noremap = true, silent = true, desc = 'Paste from clipboard' })
-vim.keymap.set('i', '<C-p>', '<C-r><C-p>+', { noremap = true, silent = true, desc = 'Paste from clipboard from within insert mode' })
-vim.keymap.set("x", "<leader>P", '"_dP', { noremap = true, silent = true, desc = 'Paste over selection without erasing unnamed register' })
+vim.keymap.set({ "n", "v", "x" }, '<C-s>', ':update <CR>', { noremap = true, silent = true, desc = 'Save' })
+vim.keymap.set({ "i" }, '<C-s>', '<Esc>:update <CR>', { noremap = true, silent = true, desc = 'Save' })
+
+vim.keymap.set({ "v", "x", "n" }, '<leader>y', '"+y', { noremap = true, silent = true, desc = 'Yank to clipboard' })
+vim.keymap.set({ "n", "v", "x" }, '<leader>Y', '"+yy', { noremap = true, silent = true, desc = 'Yank line to clipboard' })
+vim.keymap.set({ "n", "v", "x" }, '<C-a>', 'gg0vG$', { noremap = true, silent = true, desc = 'Select all' })
+vim.keymap.set({ 'n', 'v', 'x' }, '<leader>p', '"+p', { noremap = true, silent = true, desc = 'Paste from clipboard' })
+vim.keymap.set('i', '<C-p>', '<C-r><C-p>+',
+  { noremap = true, silent = true, desc = 'Paste from clipboard from within insert mode' })
+vim.keymap.set("x", "<leader>P", '"_dP',
+  { noremap = true, silent = true, desc = 'Paste over selection without erasing unnamed register' })
+
+
+local function write_file(content, path)
+  local file, err = io.open(path, "w")
+
+  file:write(content)
+  file:close()
+end
+
+local function reload_config()
+  local NS  = "myLuaConf"                                 -- <- your top-level namespace
+  local ALT = vim.fn.expand("/Users/antoine.carnec/non-work/nvim-nix/config")       -- <- your alt config dir
+  local INIT = ALT .. "/init.lua"
+
+  -- sanity
+  local function exists(p) return (vim.uv.fs_stat(p) ~= nil) end
+  if not exists(ALT) or not exists(INIT) then
+    vim.notify("ALT missing: " .. INIT, vim.log.levels.ERROR); return
+  end
+
+  write_file(vim.inspect(package.loaded), "/Users/antoine.carnec/.test/nvim_debug/packagesdotloaded")
+
+  -- keep ALT on rtp (so colors/ftplugin/etc. can be found if needed)
+  pcall(function() vim.opt.rtp:remove(ALT) end)
+  vim.opt.rtp:prepend(ALT)
+
+  -- clear lazy/lze caches so plugin specs can be re-registered on reload
+  for name, _ in pairs(package.loaded) do
+    if name:match('^lazy') or name:match('^lze') or name:match('^lzextras') then
+      package.loaded[name] = nil
+    end
+  end
+
+  -- wrapper: for NS.* load strictly from ALT/lua, else fallback to original require
+  local orig_require = require
+  local function alt_require(mod)
+    if mod == NS or mod:sub(1, #NS + 1) == NS .. "." then
+      local rel = mod:gsub("%.", "/")
+      local p1  = ALT .. "/lua/" .. rel .. ".lua"
+      local p2  = ALT .. "/lua/" .. rel .. "/init.lua"
+      local path = exists(p1) and p1 or (exists(p2) and p2 or nil)
+      if not path then
+        error(("not found in ALT for %s (checked %s and %s)"):format(mod, p1, p2))
+      end
+      -- drop stale cache for this module so we reload fresh
+      package.loaded[mod]  = nil
+      package.preload[mod] = nil
+      local chunk, load_err = loadfile(path)
+      if not chunk then error(load_err) end
+      local out = chunk()  -- run module
+      package.loaded[mod] = (out == nil) and true or out
+      return package.loaded[mod]
+    else
+      return orig_require(mod)
+    end
+  end
+
+  -- run ALT init.lua with wrapped require, then restore
+  local ok, err
+  _G.require = alt_require
+  ok, err = pcall(dofile, INIT)
+  _G.require = orig_require
+
+  if not ok then
+    vim.notify("ALT init error:\n" .. err, vim.log.levels.ERROR)
+  else
+    vim.notify("Loaded ALT: " .. ALT)
+  end
+end
+
+vim.keymap.set("n", "<leader>rc", reload_config, { desc = "Reload [c]onfig" })

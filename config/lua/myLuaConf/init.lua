@@ -31,3 +31,5 @@ if nixCats('format') then
 end
 
 vim.cmd.colorscheme('nord')
+
+vim.notify("myLuaConf/init.lua has loaded")

@@ -9,18 +9,20 @@ require('lze').load {
       { "<leader>FF", desc = "[F]ormat [F]ile" },
     },
     -- colorscheme = "",
-    after = function (plugin)
+    after = function(plugin)
       local conform = require("conform")
 
       conform.setup({
         formatters_by_ft = {
           -- NOTE: download some formatters in lspsAndRuntimeDeps
           -- and configure them here
-          -- lua = { "stylua" },
           -- go = { "gofmt", "golint" },
           -- templ = { "templ" },
           -- Conform will run multiple formatters sequentially
+          lua = { "stylua" },
           python = { "ruff" },
+          rust = { "rustfmt" },
+          conform.setup()
           -- Use a sub-list to run only the first available formatter
           -- javascript = { { "prettierd", "prettier" } },
         },

@@ -61,3 +61,5 @@ the rest is just example of how to configure nvim making use of various
 features of nixCats and using the plugin lze for lazy loading.
 --]]
 require('myLuaConf')
+
+vim.notify("init.lua changed")

@@ -1,5 +1,5 @@
 return {
-  "nvim-tree-lua",
+  "nvim-tree.lua",
   for_cat = 'general.extra',
   event = "DeferredUIEnter",
   before = function(_)

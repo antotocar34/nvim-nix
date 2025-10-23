@@ -38,8 +38,8 @@ if not diagnostics_controls then
     }
 
     if state.diagnostics_enabled then
-      config.signs = true
-      config.underline = true
+      config.signs = false
+      config.underline = false
       config.virtual_text = {
         spacing = 0,
         prefix = '  ',

@@ -113,11 +113,11 @@
           (builtins.getAttr (categories.colorscheme or "onedark") {
               # Theme switcher without creating a new category
               "nord" = pkgs.neovimPlugins.nord;
-              "onedark" = onedark-nvim;
-              "catppuccin" = catppuccin-nvim;
-              "catppuccin-mocha" = catppuccin-nvim;
-              "tokyonight" = tokyonight-nvim;
-              "tokyonight-day" = tokyonight-nvim;
+              # "onedark" = onedark-nvim;
+              # "catppuccin" = catppuccin-nvim;
+              # "catppuccin-mocha" = catppuccin-nvim;
+              # "tokyonight" = tokyonight-nvim;
+              # "tokyonight-day" = tokyonight-nvim;
             }
           );
           # This is obviously a fairly basic usecase for this, but still nice.
