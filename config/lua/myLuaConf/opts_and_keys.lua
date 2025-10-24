@@ -124,6 +124,8 @@ vim.keymap.set('n', '<leader>q', ":bd <CR>", { desc = 'Close Buffer' })
 
 
 -- You should instead use these keybindings so that they are still easy to use, but dont conflict
+vim.keymap.set({ "n" }, '<C-q>', ':q! <CR>', { noremap = true, silent = true, desc = 'Quit!' })
+
 vim.keymap.set({ "n", "v", "x" }, '<C-s>', ':update <CR>', { noremap = true, silent = true, desc = 'Save' })
 vim.keymap.set({ "i" }, '<C-s>', '<Esc>:update <CR>', { noremap = true, silent = true, desc = 'Save' })
 

@@ -62,6 +62,9 @@
         debug = with pkgs; {
           go = [ delve ];
         };
+        bqls = [
+          (pkgs.callPackage ./derivations/bqls.nix {})
+        ];
         go = with pkgs; [
           gopls
           gotools
@@ -211,17 +214,6 @@
         ];
       };
 
-      # environmentVariables:
-      # this section is for environmentVariables that should be available
-      # at RUN TIME for plugins. Will be available to path within neovim terminal
-      environmentVariables = {
-        test = {
-          default = {
-            CATTESTVARDEFAULT = "It worked!";
-          };
-        };
-      };
-
       # get the path to this python environment
       # in your lua config via
       # vim.g.python3_host_prog
@@ -272,10 +264,8 @@
           lint = true;
           format = true;
           neonixdev = true;
-
           python = true;
           rust = true;
-
           # this does not have an associated category of plugins, 
           # but lua can still check for it
           lspDebugMode = false;

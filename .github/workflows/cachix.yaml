@@ -1,0 +1,44 @@
+name: "Build and Cache Nix Packages"
+
+on:
+  push:
+    branches: [ master ]
+  # pull_request:
+
+jobs:
+  build:
+    # Use a matrix to define the different build environments
+    strategy:
+      matrix:
+        # Define the variables for each job
+        include:
+          - os: ubuntu-latest
+            nix_system: x86_64-linux
+          - os: macos-14 # Apple Silicon (M1/M2) runner
+            nix_system: aarch64-darwin
+
+    # Dynamically set the runner based on the matrix 'os' variable
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Set up Cachix
+        uses: cachix/cachix-action@v16
+        with:
+          name: antoinecarnec # Replace with your cachix cache name
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          useDaemon: false
+          pathsToPush: result
+          
+
+      - name: Build Nix Package
+        # Dynamically build the package for the correct system
+        run: nix-build derivations
+
