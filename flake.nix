@@ -293,7 +293,7 @@
     pkgs = import nixpkgs { inherit system; };
   in {
 
-    packages = utils.mkAllWithDefault defaultPackage;
+    packages = (utils.mkAllWithDefault defaultPackage) // { derivations = (import ./derivations/default.nix pkgs);};
     devShells = {
       default = pkgs.mkShell {
         name = defaultPackageName;

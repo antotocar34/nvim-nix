@@ -12,10 +12,8 @@ jobs:
       matrix:
         # Define the variables for each job
         include:
-          - os: ubuntu-latest
-            nix_system: x86_64-linux
+          - os: ubuntu-latest # Ubuntu x86-64
           - os: macos-14 # Apple Silicon (M1/M2) runner
-            nix_system: aarch64-darwin
 
     # Dynamically set the runner based on the matrix 'os' variable
     runs-on: ${{ matrix.os }}
@@ -39,6 +37,5 @@ jobs:
           
 
       - name: Build Nix Package
-        # Dynamically build the package for the correct system
-        run: nix-build
+        run: nix -L build -o result .#derivations
 
