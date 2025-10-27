@@ -29,7 +29,7 @@ end
 local function apply_config()
   vim.diagnostic.config({
     -- Don’t underline/sign; use virtual text only when enabled
-    underline        = false,
+    underline        = true,
     signs            = false,
     virtual_lines    = false,
     float            = { border = 'rounded', source = 'if_many' },

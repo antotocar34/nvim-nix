@@ -10,3 +10,7 @@ shell:
 
 rust-test:
   nix run .#nvim "./test_files/rust_demo/src/main.rs"
+
+reinstall:
+  nix profile remove nvim-nix
+  nix profile add .

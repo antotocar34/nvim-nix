@@ -191,6 +191,7 @@
             nvim-surround
           ];
           extra = with pkgs.vimPlugins; [
+            vim-slime
             fidget-nvim
             # lualine-lsp-progress
             which-key-nvim
