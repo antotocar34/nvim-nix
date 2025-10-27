@@ -1,10 +1,11 @@
 {
   buildGoModule,
   fetchFromGitHub,
-  clangStdenv
+  clangStdenv,
+  llvmPackages ? null
 }:
 
-buildGoModule (final: {
+(buildGoModule.override { stdenv = clangStdenv; }) (final: {
   pname = "bqls";
   version = "0.4.2";
 
@@ -17,16 +18,24 @@ buildGoModule (final: {
 
   vendorHash = "sha256-0seGfOBpxPhdndoO3QBlWjoYtPxXrCreOiiviLz4c1I=";
 
+    # Optional: sanity check in logs
+  preBuild = ''
+    echo "CGO_ENABLED=$CGO_ENABLED"
+    echo "CC=$CC ($(type -p $CC))"
+    echo "CXX=$CXX ($(type -p $CXX))"
+    $CC --version || true
+    $CXX --version || true
+  '';
+
+  nativeBuildInputs = [ clangStdenv.cc ] ++ (if llvmPackages == null then [] else [ llvmPackages.clang ]);
+
   stdenv = clangStdenv;
 
-  env.CGO_ENABLED = 1;
+  CC = "${clangStdenv.cc}/bin/clang";
+  CXX = "${clangStdenv.cc}/bin/clang++";
 
-  # One of the test fails :(
-  doCheck = false;
-
-  # plugin test is flaky, see https://github.com/FiloSottile/age/issues/517
-  checkFlags = [
-  ];
+  doCheck = false; # One of the test fails :(
+  checkFlags = [ ];
 
   # group age plugins together
   passthru.plugins = { };

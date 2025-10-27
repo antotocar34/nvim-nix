@@ -31,6 +31,22 @@
         "type": "github"
       }
     },
+    "plugins-bqls": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1760018751,
+        "narHash": "sha256-mx3Bigt9pauhzE90/45yI/6otfVPvUY0HmtVy+fWLR4=",
+        "owner": "kitagry",
+        "repo": "bqls.nvim",
+        "rev": "350eef1a2a7fffd7d12538d7537c1574ae993f4b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kitagry",
+        "repo": "bqls.nvim",
+        "type": "github"
+      }
+    },
     "plugins-nord": {
       "flake": false,
       "locked": {
@@ -51,6 +67,7 @@
       "inputs": {
         "nixCats": "nixCats",
         "nixpkgs": "nixpkgs",
+        "plugins-bqls": "plugins-bqls",
         "plugins-nord": "plugins-nord"
       }
     }

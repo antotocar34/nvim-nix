@@ -6,7 +6,7 @@ t ext:
   nvim "./test_files/test.{{ext}}"
 
 shell:
-  nix profile upgrade .#nvim
+  nix shell .#nvim
 
 rust-test:
   nix run .#nvim "./test_files/rust_demo/src/main.rs"

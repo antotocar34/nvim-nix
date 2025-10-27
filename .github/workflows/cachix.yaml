@@ -37,5 +37,4 @@ jobs:
           
 
       - name: Build Nix Package
-        run: nix -L build -o result .#derivations
-
+        run: nix -L build -o result .#derivations .#nvim

@@ -1,12 +1,23 @@
 {
   description = "Antoine's neovim config";
 
+  nixConfig.extra-substituters = [ "https://antoinecarnec.cachix.org/" ];
+  nixConfig.extra-trusted-public-keys = [
+    "antoinecarnec.cachix.org-1:wQ75D1HEpoDPkzyOIIXJQk3nQRVMwE0NaQi/lPVlE7E="
+  ];
+
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/e643668fd71b949c53f8626614b21ff71a07379d";
     nixCats.url = "github:BirdeeHub/nixCats-nvim"; 
 
     plugins-nord = {
       url = "github:antotocar34/nord.nvim";
+      flake = false;
+    };
+
+    plugins-bqls = {
+      url = "github:kitagry/bqls.nvim";
       flake = false;
     };
 
@@ -62,7 +73,7 @@
         debug = with pkgs; {
           go = [ delve ];
         };
-        bqls = [
+        bquery = [
           (pkgs.callPackage ./derivations/bqls.nix {})
         ];
         go = with pkgs; [
@@ -150,11 +161,16 @@
         format = with pkgs.vimPlugins; [
           conform-nvim
         ];
-        markdown = with pkgs.vimPlugins; [
-          markdown-preview-nvim
-        ];
+        # markdown = with pkgs.vimPlugins; [
+        #   markdown-preview-nvim
+        # ];
+
         neonixdev = with pkgs.vimPlugins; [
           lazydev-nvim
+        ];
+
+        bquery = [
+          pkgs.neovimPlugins.bqls
         ];
         general = {
           blink = with pkgs.vimPlugins; [
@@ -260,13 +276,14 @@
         };
         # enable the categories you want from categoryDefinitions
         categories = {
-          markdown = true;
+          # markdown = true;
           general = true;
           lint = true;
           format = true;
           neonixdev = true;
           python = true;
           rust = true;
+          bquery = true;
           # this does not have an associated category of plugins, 
           # but lua can still check for it
           lspDebugMode = false;
