@@ -33,7 +33,8 @@ jobs:
           name: antoinecarnec # Replace with your cachix cache name
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
           useDaemon: false
-          pathsToPush: result
+          # Leave empty to push all build results
+          pathsToPush:
           
 
       - name: Build Nix Package
