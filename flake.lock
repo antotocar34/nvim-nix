@@ -50,11 +50,11 @@
     "plugins-nord": {
       "flake": false,
       "locked": {
-        "lastModified": 1671661589,
-        "narHash": "sha256-cFnQZ9iOQnYNcSFY2WnqcTI3buOrGQYQ3T7SCcH5YW0=",
+        "lastModified": 1761785745,
+        "narHash": "sha256-G5HwkhlkCOoN+JrK34UuWk3/E9VASics8s9ZyVd81Ag=",
         "owner": "antotocar34",
         "repo": "nord.nvim",
-        "rev": "50f637c276e05e25b1dcfc7cd112b505ded466fe",
+        "rev": "85fd873abbfbd9e7e9852a6418f81840491331de",
         "type": "github"
       },
       "original": {
@@ -63,12 +63,29 @@
         "type": "github"
       }
     },
+    "plugins-snacks": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1761778900,
+        "narHash": "sha256-r1MgEaRW4YF2GQUeqx+uMlfTL5+CQAQiBMJXq82AEXk=",
+        "owner": "folke",
+        "repo": "snacks.nvim",
+        "rev": "ba529d4f5d409639e082aff916c9b8e71b480531",
+        "type": "github"
+      },
+      "original": {
+        "owner": "folke",
+        "repo": "snacks.nvim",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "nixCats": "nixCats",
         "nixpkgs": "nixpkgs",
         "plugins-bqls": "plugins-bqls",
-        "plugins-nord": "plugins-nord"
+        "plugins-nord": "plugins-nord",
+        "plugins-snacks": "plugins-snacks"
       }
     }
   },

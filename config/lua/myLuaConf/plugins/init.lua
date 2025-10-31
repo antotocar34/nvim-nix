@@ -19,7 +19,7 @@ end
 -- NOTE: you can check if you included the category with the thing wherever you want.
 -- if nixCats('general.extra') then
 -- end
-
+-- For the first argument check :NixCats pawsible
 require('lze').load {
   { import = "myLuaConf.plugins.telescope", },
   { import = "myLuaConf.plugins.treesitter", },
@@ -30,6 +30,28 @@ require('lze').load {
   { import = "myLuaConf.plugins.floaterm", },
   { import = "myLuaConf.plugins.vimslime", },
   { import = "myLuaConf.plugins.lualine", },
+  { import = "myLuaConf.plugins.bqls", },
+  {
+    -- autopairs
+    "lexima.vim",
+    for_cat = "general.extra",
+    event = "DeferredUIEnter"
+  },
+  {
+    "snacks",
+    for_cat = "general.always",
+    event = "DeferredUIEnter",
+    after = function(_)
+      local snacks = require("snacks")
+      snacks.setup({
+        input = {
+          enable = true
+        }
+      }) 
+    end
+
+    
+  },
   -- {
   --   "markdown-preview.nvim",
   --   for_cat = 'general.markdown',

@@ -1,3 +1,7 @@
 # Nix Powered neovim config
 
-Using nixCats
+My neovim config, packaged using nix and the `nixCats` library!
+
+## Cool features
+
+- Bigquery LSP along with packaged language server

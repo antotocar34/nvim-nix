@@ -21,6 +21,11 @@
       flake = false;
     };
 
+    plugins-snacks = {
+      url = "github:folke/snacks.nvim";
+      flake = false;
+    };
+
     # neovim-nightly-overlay = {
     #   url = "github:nix-community/neovim-nightly-overlay";
     # };
@@ -48,15 +53,12 @@
 
     ];
 
+
     # see :help nixCats.flake.outputs.categories
     # and
     # :help nixCats.flake.outputs.categoryDefinitions.scheme
     categoryDefinitions = { pkgs, settings, categories, extra, name, mkPlugin, ... }@packageDef: {
 
-      # lspsAndRuntimeDeps:
-      # this section is for dependencies that should be available
-      # at RUN TIME for plugins. Will be available to PATH within neovim terminal
-      # this includes LSPs
       lspsAndRuntimeDeps = {
         # some categories of stuff.
         general = with pkgs; [
@@ -74,7 +76,7 @@
           go = [ delve ];
         };
         bquery = [
-          (pkgs.callPackage ./derivations/bqls.nix {})
+          (pkgs.callPackage ./derivations/bqls-with-pr.nix {})
         ];
         go = with pkgs; [
           gopls
@@ -117,6 +119,7 @@
             (nvim-notify.overrideAttrs { doCheck = false; }) # TODO: remove overrideAttrs after check is fixed
           ];
           extra = [
+            lexima-vim
             nvim-web-devicons
           ];
         };
@@ -138,16 +141,11 @@
       };
 
       # not loaded automatically at startup.
-      # use with packadd and an autocommand in config to achieve lazy loading
-      # or a tool for organizing this like lze or lz.n!
-      # to get the name packadd expects, use the
+      # Use lze!
+      # To get the name packadd expects, use the
       # `:NixCats pawsible` command to see them all
       optionalPlugins = {
         debug = with pkgs.vimPlugins; {
-          # it is possible to add default values.
-          # there is nothing special about the word "default"
-          # but we have turned this subcategory into a default value
-          # via the extraCats section at the bottom of categoryDefinitions.
           default = [
             nvim-dap
             nvim-dap-ui
@@ -205,6 +203,7 @@
             vim-fugitive
             vim-rhubarb
             nvim-surround
+            pkgs.neovimPlugins.snacks
           ];
           extra = with pkgs.vimPlugins; [
             vim-slime
@@ -263,13 +262,13 @@
         settings = {
           suffix-path = true;
           suffix-LD = true;
-          aliases = [ "vim" "vimcat" ];
+          aliases = [ "vim" ];
 
           # :help nixCats.flake.outputs.settings for all of the settings available
           wrapRc = true;
           # wrapRc = "WRAPNEOVIM";
           # configDirName = "nixCats-nvim";
-          unwrappedCfgPath = "/Users/antoine.carnec/non-work/nvim-nix";
+          unwrappedCfgPath = "/Users/antoine.carnec/non-work/nvim-nix/config";
           # neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.system}.neovim;
           hosts.python3.enable = true;
           hosts.node.enable = true;
@@ -284,11 +283,9 @@
           python = true;
           rust = true;
           bquery = true;
-          # this does not have an associated category of plugins, 
-          # but lua can still check for it
+          debug = true;
           lspDebugMode = false;
-          # you could also pass something else:
-          # see :help nixCats
+
           themer = true;
           colorscheme = "nord";
         };
@@ -311,7 +308,7 @@
     pkgs = import nixpkgs { inherit system; };
   in {
 
-    packages = (utils.mkAllWithDefault defaultPackage) // { derivations = (import ./derivations/default.nix pkgs);};
+    packages = (utils.mkAllWithDefault defaultPackage) // { derivations = (import ./derivations/default.nix { inherit pkgs; });};
     devShells = {
       default = pkgs.mkShell {
         name = defaultPackageName;

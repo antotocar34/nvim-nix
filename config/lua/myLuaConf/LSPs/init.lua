@@ -92,7 +92,7 @@ require('lze').load {
   {
     "nvim-lspconfig",
     for_cat = "general.core",
-    -- on_require = { "lspconfig" },
+    on_require = { "lspconfig" },
     -- NOTE: define a function for lsp,
     -- and it will run for all specs with type(plugin.lsp) == table
     -- when their filetype trigger loads them
@@ -161,17 +161,6 @@ require('lze').load {
       },
     },
     -- also these are regular specs and you can use before and after and all the other normal fields
-  },
-  {
-    "bqls",
-    for_cat = "bquery",
-    lsp = {
-      filetypes = { "sql", "bqsql" },
-      settings = {
-        project_id = "king-antoine-carnec-dev",
-        location = "EU",
-      }
-    }
   },
   {
     "gopls",
@@ -254,14 +243,25 @@ require('lze').load {
             -- of where your config actually was.
             nixos = {
               -- nixdExtras.nixos_options = ''(builtins.getFlake "path:${builtins.toString inputs.self.outPath}").nixosConfigurations.configname.options''
-              expr = nixCats.extra("nixdExtras.nixos_options")
+              expr = nixCats.extra("nixdExtras.nixos_options") or [[import <nixos>]]
             },
             -- If you have your config as a separate flake, inputs.self would be referring to the wrong flake.
             -- You can override the correct one into your package definition on import in your main configuration,
             -- or just put an absolute path to where it usually is and accept the impurity.
             ["home-manager"] = {
               -- nixdExtras.home_manager_options = ''(builtins.getFlake "path:${builtins.toString inputs.self.outPath}").homeConfigurations.configname.options''
+              -- HACK: set nixpath to options? and then import that?
+              -- HACK: use the select module???
+              -- HACK: use the select module???
               expr = nixCats.extra("nixdExtras.home_manager_options")
+              or [[
+                  let
+                    hostname = <hostname>;
+                    flake = (builtins.getFlake "path:${toString ~/.config/dotfiles}");
+                    options = flake.homeConfigurations.${toString <hostname>}.options;
+                  in
+                  options
+                ]]
             }
           },
           formatting = {

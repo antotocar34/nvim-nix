@@ -2,8 +2,7 @@ test:
   nix run . flake.nix
 
 t ext:
-  nix profile upgrade
-  nvim "./test_files/test.{{ext}}"
+  nix run . "./test_files/test.{{ext}}"
 
 shell:
   nix shell .#nvim
