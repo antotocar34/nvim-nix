@@ -10,7 +10,9 @@ return {
       require('lualine').setup({
         options = {
           icons_enabled = true,
-          theme = "nord",
+          theme = function()
+            return vim.g.colors_name or nixCats("colorscheme")
+          end,
           component_separators = { '⏽', '⏽' },
           section_separators = { '', '' },
           disabled_filetypes = { 'NvimTree', 'floaterm' },

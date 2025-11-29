@@ -87,6 +87,7 @@ return {
       { "<leader>sd", function() return require('telescope.builtin').diagnostics() end, mode = {"n"}, desc = '[S]earch [D]iagnostics', },
       { "<leader>sg", function() return require('telescope.builtin').live_grep() end, mode = {"n"}, desc = '[S]earch by [G]rep', },
       { "<leader>j;", function() return require('telescope.builtin').live_grep() end, mode = {"n"}, desc = 'Search Grep', },
+      { "<leader>jb", function() return require('telescope.builtin').buffers() end, mode = {"n"}, desc = 'Search [B]uffers', },
       { "<leader>jg", live_grep_git_root, mode = {"n"}, desc = 'Grep [G]it root', },
       { "<leader>sw", function() return require('telescope.builtin').grep_string() end, mode = {"n"}, desc = '[S]earch current [W]ord', },
       { "<leader>ss", function() return require('telescope.builtin').builtin() end, mode = {"n"}, desc = '[S]earch [S]elect Telescope', },

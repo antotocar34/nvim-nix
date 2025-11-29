@@ -1,7 +1,4 @@
 local colorschemeName = nixCats('colorscheme')
-if not require('nixCatsUtils').isNixCats then
-  colorschemeName = 'onedark'
-end
 
 local ok, notify = pcall(require, "notify")
 if ok then
@@ -32,6 +29,54 @@ require('lze').load {
   { import = "myLuaConf.plugins.lualine", },
   { import = "myLuaConf.plugins.bqls", },
   {
+    -- TODO remove UI or reduce opacity
+    "fidget.nvim",
+    for_cat = 'general.extra',
+    event = "DeferredUIEnter",
+    -- keys = "",
+    after = function(_)
+      require('fidget').setup({
+        progress = {
+          ignore_empty_message = true,
+          display = {
+
+            -- Disable message about lsp progress, I don't need to know :D
+            format_message = function(_) return "" end,     -- hide message body
+            format_annote  = function(_) return nil end,    -- hide annotation/title
+            -- format_group_name = function(_) return ""  end,  -- hide group name
+
+            done_ttl       = 2,
+            progress_ttl   = 3,
+            group_style    = "Comment",
+            overrides      = setmetatable({}, {
+              __index = function(_, _)
+                return {
+                  update_hook = function(item)
+                    item.cnt   = 2   -- stop "(xN)"
+                    item.level = nil -- hide INFO/ERROR label
+                  end,
+                }
+              end,
+            }),
+          },
+
+          lsp = {
+            progress_ringbuf_size = 1
+          }
+
+        },
+        notification = {
+
+
+          window = {
+            winblend = 40,
+          },
+          override_vim_notify = true
+        },
+      })
+    end,
+  },
+  {
     -- autopairs
     "lexima.vim",
     for_cat = "general.extra",
@@ -47,10 +92,10 @@ require('lze').load {
         input = {
           enable = true
         }
-      }) 
+      })
     end
 
-    
+
   },
   -- {
   --   "markdown-preview.nvim",
@@ -101,28 +146,6 @@ require('lze').load {
       vim.g.startuptime_event_width = 0
       vim.g.startuptime_tries = 10
       vim.g.startuptime_exe_path = nixCats.packageBinPath
-    end,
-  },
-  {
-    -- TODO remove UI or reduce opacity
-    "fidget.nvim",
-    for_cat = 'general.extra',
-    event = "DeferredUIEnter",
-    -- keys = "",
-    after = function(_)
-      require('fidget').setup({
-        progress = {
-          display = {
-            done_ttl = 1
-          }
-        },
-        notification = {
-          window = {
-            winblend = 40,
-          },
-          override_vim_notify = true
-        },
-      })
     end,
   },
   {

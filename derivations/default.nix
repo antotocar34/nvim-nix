@@ -13,7 +13,6 @@
 let
 allPackages = {
   bqls = pkgs.callPackage ./bqls.nix {};
-  bqls-with-pr = pkgs.callPackage ./bqls-with-pr.nix {};
 };
 in
 pkgs.symlinkJoin {

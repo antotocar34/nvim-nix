@@ -76,7 +76,7 @@
           go = [ delve ];
         };
         bquery = [
-          (pkgs.callPackage ./derivations/bqls-with-pr.nix {})
+          (pkgs.callPackage ./derivations/bqls.nix {})
         ];
         go = with pkgs; [
           gopls
@@ -121,7 +121,19 @@
           extra = [
             lexima-vim
             nvim-web-devicons
+
+            # Colorschemes
+            pkgs.neovimPlugins.nord
+            melange-nvim
+            onedark-nvim
+            catppuccin-nvim
+            catppuccin-nvim
+            tokyonight-nvim
+            tokyonight-nvim
+
           ];
+
+
         };
         # You can retreive information from the
         # packageDefinitions of the package this was packaged with.
@@ -130,11 +142,12 @@
           (builtins.getAttr (categories.colorscheme or "onedark") {
               # Theme switcher without creating a new category
               "nord" = pkgs.neovimPlugins.nord;
-              # "onedark" = onedark-nvim;
-              # "catppuccin" = catppuccin-nvim;
-              # "catppuccin-mocha" = catppuccin-nvim;
-              # "tokyonight" = tokyonight-nvim;
-              # "tokyonight-day" = tokyonight-nvim;
+              "melange" = melange-nvim;
+              "onedark" = onedark-nvim;
+              "catppuccin" = catppuccin-nvim;
+              "catppuccin-mocha" = catppuccin-nvim;
+              "tokyonight" = tokyonight-nvim;
+              "tokyonight-day" = tokyonight-nvim;
             }
           );
           # This is obviously a fairly basic usecase for this, but still nice.
@@ -265,7 +278,7 @@
           aliases = [ "vim" ];
 
           # :help nixCats.flake.outputs.settings for all of the settings available
-          wrapRc = true;
+          wrapRc = false;
           # wrapRc = "WRAPNEOVIM";
           # configDirName = "nixCats-nvim";
           unwrappedCfgPath = "/Users/antoine.carnec/non-work/nvim-nix/config";
@@ -287,7 +300,7 @@
           lspDebugMode = false;
 
           themer = true;
-          colorscheme = "nord";
+          colorscheme = "melange";
         };
         extra = {
           nixdExtras = {

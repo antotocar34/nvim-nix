@@ -2,6 +2,7 @@
   buildGoModule,
   fetchFromGitHub,
   clangStdenv,
+  tree-sitter,
   llvmPackages ? null
 }:
 
@@ -12,13 +13,15 @@
   src = fetchFromGitHub {
     owner = "kitagry";
     repo = "bqls";
-    tag = "v${final.version}";
-    hash = "sha256-Twad+VTdgCgPTsuJZrrUEmELsv0wtyp9TBK9ldq/jYo=";
+    # tag = "v${final.version}";
+    rev = "6c3932ba6a7fd04300b82a51cce4d3380eceeadd";
+    hash = "sha256-3jxQrRrXy3n6b6N6nHFP9hKdynhw5a8IyN+GI+ZhW/k=";
   };
 
-  vendorHash = "sha256-0seGfOBpxPhdndoO3QBlWjoYtPxXrCreOiiviLz4c1I=";
+  proxyVendor = true;
+  vendorHash = "sha256-8Im6YxIPWDIr4y2MmW2CPZFLbY+gvp5w3smJZywCAeI=";
 
-    # Optional: sanity check in logs
+  # Optional: sanity check in logs
   preBuild = ''
     echo "CGO_ENABLED=$CGO_ENABLED"
     echo "CC=$CC ($(type -p $CC))"
@@ -36,9 +39,6 @@
 
   doCheck = false; # One of the test fails :(
   checkFlags = [ ];
-
-  # group age plugins together
-  passthru.plugins = { };
 
   # meta = with lib; { ... };
 })

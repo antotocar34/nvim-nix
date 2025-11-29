@@ -2,6 +2,14 @@ local catUtils = require('nixCatsUtils')
 
 require("myLuaConf.LSPs.diagnostics")
 
+function get_hostname()
+    local f = io.popen ("/bin/hostname")
+    local hostname = f:read("*a") or ""
+    f:close()
+    hostname =string.gsub(hostname, "\n$", "")
+    return hostname
+end
+
 local diagnostic_circle = vim.fn.nr2char(0x25CF)
 local function diagnostic_text(diagnostic)
   local message = diagnostic.message or ''
@@ -197,11 +205,12 @@ require('lze').load {
     end,
   },
   {
+    -- TODO set python interpreter as root of filesystem in .venv/bin/python
     "pyright",
     for_cat = "python",
     lsp = {
       filetypes = { "python" },
-    },
+    }
   },
   {
     "rnix",
@@ -258,7 +267,7 @@ require('lze').load {
                   let
                     hostname = <hostname>;
                     flake = (builtins.getFlake "path:${toString ~/.config/dotfiles}");
-                    options = flake.homeConfigurations.${toString <hostname>}.options;
+                    options = flake.homeConfigurations.]] .. get_hostname() .. [[.options;
                   in
                   options
                 ]]
